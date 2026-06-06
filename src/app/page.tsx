@@ -51,18 +51,23 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-6 py-12">
       {/* Hero */}
-      <header className="flex w-full flex-col items-center gap-6 rounded-3xl bg-cream px-10 py-12 border border-black/5 shadow-sm">
+      <header className="flex w-full flex-col items-center gap-8 rounded-3xl bg-dark px-10 py-12 shadow-sm sm:flex-row sm:justify-between">
+        <div className="text-center sm:text-left">
+          <h1 className="text-5xl font-extrabold text-coral sm:text-6xl">
+            Rondje Rekenen
+          </h1>
+          <p className="mt-3 max-w-sm text-base text-white/70">
+            Reken je slimmer, rondje voor rondje.
+          </p>
+        </div>
         <Image
-          src="/logo.jpg"
+          src="/logo-emblem.jpg"
           alt="Rondje Rekenen"
-          width={375}
-          height={225}
-          className="w-64 sm:w-80"
-          priority
+          width={280}
+          height={280}
+          className="w-[280px] rounded-2xl shadow-lg"
+          preload
         />
-        <p className="max-w-sm text-center text-base text-dark/60">
-          Reken je slimmer, rondje voor rondje.
-        </p>
       </header>
 
       {/* Uitleg */}

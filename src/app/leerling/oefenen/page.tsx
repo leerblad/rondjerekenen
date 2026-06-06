@@ -42,10 +42,13 @@ export default function Oefenen() {
     unlockedOperation: string | null;
   } | null>(null);
 
+  const [inputValue, setInputValue] = useState("");
+
   const answersRef = useRef<RecordedAnswer[]>([]);
   const startRef = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const questionRef = useRef<Question | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const operation = (student?.currentOperation || "plus") as Operation;
   const grade = student?.grade || 4;
@@ -105,7 +108,10 @@ export default function Oefenen() {
       setLocked(false);
       setFlash(null);
       setTimeLeft(100);
+      setInputValue("");
       startRef.current = Date.now();
+      // focus the input when the new question renders
+      setTimeout(() => inputRef.current?.focus(), 0);
 
       clearTimer();
       const start = Date.now();
@@ -251,18 +257,32 @@ export default function Oefenen() {
         )}
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3">
-        {question?.options.map((opt) => (
-          <button
-            key={opt}
-            disabled={locked}
-            onClick={() => handleAnswer(opt)}
-            className="rounded-2xl bg-white py-6 font-mono text-3xl font-bold shadow-sm transition hover:bg-purple hover:text-white disabled:opacity-60"
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
+      <form
+        className="mb-4 flex flex-col gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (locked || inputValue.trim() === "") return;
+          handleAnswer(parseInt(inputValue, 10));
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="number"
+          inputMode="numeric"
+          autoFocus
+          disabled={locked}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          className="w-full rounded-2xl border-4 border-transparent bg-white py-6 text-center font-mono text-5xl font-bold shadow-sm outline-none transition focus:border-coral disabled:opacity-60 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <button
+          type="submit"
+          disabled={locked || inputValue.trim() === ""}
+          className="w-full rounded-2xl bg-coral py-4 text-xl font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
+        >
+          Controleer
+        </button>
+      </form>
     </main>
   );
 }
