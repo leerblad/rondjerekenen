@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const { data } = await supabaseAdmin
     .from("students")
     .select(
-      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit"
+      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit, avatar_url"
     )
     .eq("class_code", code)
     .eq("nickname", nickname)
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       coins: data.coins,
       currentOperation: data.current_operation,
       avatarOutfit: data.avatar_outfit,
+      avatarUrl: data.avatar_url,
     },
   });
   res.cookies.set("rr_token", token, {

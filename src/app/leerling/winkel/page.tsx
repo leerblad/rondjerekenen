@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
 import { Illustration } from "@/components/Illustration";
+import RPMAvatar from "@/components/RPMAvatar";
 import { Operation, OPERATIONS } from "@/lib/math";
 
 type Item = {
@@ -55,12 +56,19 @@ function DressUpCharacter({
   operation = "plus",
   width = 200,
   height = 320,
+  avatarUrl,
 }: {
   outfit?: Record<string, string>;
   operation?: string;
   width?: number;
   height?: number;
+  avatarUrl?: string;
 }) {
+  if (avatarUrl) {
+    // RPM avatar already includes the outfit chosen during creation
+    return <RPMAvatar avatarUrl={avatarUrl} size={width} />;
+  }
+
   const level = Math.max(0, OPERATIONS.indexOf(operation as Operation));
   const ring = LEVEL_RING[Math.min(level, LEVEL_RING.length - 1)];
   const shirtKey = outfit.shirt;
@@ -254,8 +262,15 @@ export default function Winkel() {
             operation={student.currentOperation}
             width={200}
             height={320}
+            avatarUrl={student.avatarUrl}
           />
           <p className="text-sm text-dark/50">Jouw avatar</p>
+          <Link
+            href="/leerling/avatar"
+            className="rounded-full border-2 border-purple px-4 py-2 text-sm font-semibold text-purple transition hover:bg-purple/5"
+          >
+            Avatar aanpassen
+          </Link>
         </div>
 
         {/* Item cards */}

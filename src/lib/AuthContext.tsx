@@ -24,6 +24,7 @@ export type StudentUser = {
   coins: number;
   currentOperation: string;
   avatarOutfit: Record<string, string>;
+  avatarUrl?: string;
 };
 
 export type AppUser = TeacherUser | StudentUser;

@@ -48,6 +48,7 @@ export default function StudentPortal() {
           outfit={student.avatarOutfit}
           operation={student.currentOperation}
           size={130}
+          avatarUrl={student.avatarUrl}
         />
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
         <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2 font-mono text-lg font-bold text-dark">

@@ -40,7 +40,7 @@ function StudentAuth() {
         return;
       }
       setUser({ role: "student", ...data.student });
-      router.push("/leerling/portal");
+      router.push(tab === "register" ? "/leerling/avatar" : "/leerling/portal");
     } finally {
       setLoading(false);
     }

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     .from("students")
     .insert({ nickname, class_code: code, grade: g })
     .select(
-      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit"
+      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit, avatar_url"
     )
     .single();
 
@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       coins: data.coins,
       currentOperation: data.current_operation,
       avatarOutfit: data.avatar_outfit,
+      avatarUrl: data.avatar_url,
     },
   });
   res.cookies.set("rr_token", token, {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Operation, OPERATIONS } from "@/lib/math";
+import RPMAvatar from "./RPMAvatar";
 
 const HAT_SRC: Record<string, string> = {
   hat_red: "/illustrations/hat-red.svg",
@@ -28,11 +29,25 @@ export default function Avatar({
   outfit = {},
   operation = "plus",
   size = 120,
+  avatarUrl,
 }: {
   outfit?: Record<string, string>;
   operation?: string;
   size?: number;
+  avatarUrl?: string;
 }) {
+  if (avatarUrl) {
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <RPMAvatar avatarUrl={avatarUrl} size={size} />
+        {/* level badge */}
+        <div className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-dark font-mono text-xs font-bold text-white">
+          {Math.max(0, ["plus", "min", "keer", "deel"].indexOf(operation)) + 1}
+        </div>
+      </div>
+    );
+  }
+
   const level = Math.max(0, OPERATIONS.indexOf(operation as Operation));
   const ring = LEVEL_RING[Math.min(level, LEVEL_RING.length - 1)];
   const shirtKey = outfit.shirt;
