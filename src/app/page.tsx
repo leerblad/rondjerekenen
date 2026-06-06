@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ReactNode } from "react";
+import { Illustration } from "@/components/Illustration";
 
 function RoleCard({
   title,
@@ -9,7 +11,7 @@ function RoleCard({
   accentColor,
 }: {
   title: string;
-  icon: string;
+  icon: ReactNode;
   description: string;
   base: string;
   accentColor: string;
@@ -17,7 +19,7 @@ function RoleCard({
   return (
     <div className="flex flex-col gap-5 rounded-3xl border border-black/5 bg-white p-8 shadow-sm">
       <div
-        className={`flex h-14 w-14 items-center justify-center rounded-2xl text-3xl ${accentColor}`}
+        className={`flex h-14 w-14 items-center justify-center rounded-2xl ${accentColor}`}
       >
         {icon}
       </div>
@@ -74,14 +76,14 @@ export default function Home() {
       <section className="mt-8 grid w-full gap-5 sm:grid-cols-2">
         <RoleCard
           title="Ik ben leerkracht"
-          icon="🧑‍🏫"
+          icon={<Illustration name="teacher" size={56} />}
           description="Maak een klas aan, deel je klascode en volg de voortgang van je leerlingen per operatie."
           base="/leerkracht"
           accentColor="bg-[#FDF1EE]"
         />
         <RoleCard
           title="Ik ben leerling"
-          icon="🧒"
+          icon={<Illustration name="student" size={56} />}
           description="Doe mee met je klascode, oefen elke dag je ronde en verdien munten voor je avatar."
           base="/leerling"
           accentColor="bg-[#F0EEF9]"

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { OPERATION_LABELS, Operation } from "@/lib/math";
+import { Illustration } from "@/components/Illustration";
 
 type Row = {
   id: string;
@@ -195,7 +196,12 @@ export default function Portal() {
                   )}
                 </td>
                 <td className="px-4 py-3 font-mono">{r.streak} 🔥</td>
-                <td className="px-4 py-3 font-mono">{r.coins} 🪙</td>
+                <td className="px-4 py-3 font-mono">
+                  <span className="flex items-center gap-1">
+                    {r.coins}
+                    <Illustration name="coin" size={16} />
+                  </span>
+                </td>
               </tr>
             ))}
             {rows.length === 0 && (

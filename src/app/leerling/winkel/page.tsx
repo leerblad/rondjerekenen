@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import Avatar from "@/components/Avatar";
+import { Illustration } from "@/components/Illustration";
 
 type Item = {
   id: string;
@@ -80,8 +81,9 @@ export default function Winkel() {
         >
           ← Terug
         </Link>
-        <span className="rounded-full bg-yellow/20 px-4 py-2 font-mono font-bold">
-          {coins} 🪙
+        <span className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2 font-mono font-bold">
+          {coins}
+          <Illustration name="coin" size={18} />
         </span>
       </div>
 
@@ -94,7 +96,10 @@ export default function Winkel() {
         <p className="text-sm text-dark/50">Jouw avatar</p>
       </div>
 
-      <h1 className="text-3xl font-extrabold">Winkel 🛍️</h1>
+      <h1 className="flex items-center gap-2 text-3xl font-extrabold">
+        <Illustration name="shop" size={32} />
+        Winkel
+      </h1>
       {error && <p className="mt-2 text-sm text-coral">{error}</p>}
 
       {categories.map((cat) => (
@@ -118,8 +123,9 @@ export default function Winkel() {
                   >
                     <p className="font-semibold">{item.name}</p>
                     {!isOwned && (
-                      <p className="font-mono text-sm text-dark/60">
-                        {item.cost} 🪙
+                      <p className="flex items-center justify-center gap-1 font-mono text-sm text-dark/60">
+                        {item.cost}
+                        <Illustration name="coin" size={16} />
                       </p>
                     )}
                     <button

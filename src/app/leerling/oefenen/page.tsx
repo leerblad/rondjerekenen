@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
+import { Illustration } from "@/components/Illustration";
 import {
   generateQuestion,
   getSessionLength,
@@ -165,7 +166,11 @@ export default function Oefenen() {
     const s = summary;
     const pct = s && s.total ? Math.round((s.correct / s.total) * 100) : 0;
     const message =
-      pct >= 80 ? "Geweldig gedaan! 🌟" : pct >= 50 ? "Goed bezig! 💪" : "Blijf oefenen! 🚀";
+      pct >= 80
+        ? "Geweldig gedaan!"
+        : pct >= 50
+          ? "Goed bezig!"
+          : "Blijf oefenen!";
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
         <h1 className="text-3xl font-extrabold">Klaar!</h1>
@@ -179,13 +184,15 @@ export default function Oefenen() {
             </p>
             <p className="text-2xl">{message}</p>
             {s.coinsAwarded > 0 && (
-              <p className="rounded-full bg-yellow/20 px-4 py-2 font-semibold">
-                +{s.coinsAwarded} munten 🪙
+              <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2 font-semibold">
+                +{s.coinsAwarded} munten
+                <Illustration name="coin" size={20} />
               </p>
             )}
             {s.unlockedOperation && (
-              <p className="rounded-2xl bg-green/15 px-4 py-3 font-semibold text-green">
-                🎉 Nieuw onderdeel vrijgespeeld:{" "}
+              <p className="flex items-center justify-center gap-2 rounded-2xl bg-green/15 px-4 py-3 font-semibold text-green">
+                <Illustration name="confetti" size={28} />
+                Nieuw onderdeel vrijgespeeld:{" "}
                 {OPERATION_LABELS[s.unlockedOperation as Operation]}!
               </p>
             )}

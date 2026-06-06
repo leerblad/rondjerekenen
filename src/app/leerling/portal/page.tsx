@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import Avatar from "@/components/Avatar";
+import { Illustration } from "@/components/Illustration";
 import {
   OPERATIONS,
   OPERATION_LABELS,
@@ -49,16 +50,18 @@ export default function StudentPortal() {
           size={130}
         />
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
-        <p className="rounded-full bg-yellow/20 px-4 py-2 font-mono text-lg font-bold text-dark">
-          {student.coins} 🪙 munten
+        <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2 font-mono text-lg font-bold text-dark">
+          <Illustration name="coin" size={20} />
+          {student.coins} munten
         </p>
       </div>
 
       <Link
         href="/leerling/oefenen"
-        className="mt-6 block rounded-3xl bg-coral py-8 text-center text-3xl font-extrabold text-white shadow-lg transition hover:opacity-90"
+        className="mt-6 flex items-center justify-center gap-3 rounded-3xl bg-coral py-8 text-center text-3xl font-extrabold text-white shadow-lg transition hover:opacity-90"
       >
-        Oefenen! ✏️
+        Oefenen!
+        <Illustration name="pencil" size={36} />
       </Link>
 
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
@@ -78,7 +81,13 @@ export default function StudentPortal() {
                       : "bg-cream text-dark/30"
                 }`}
               >
-                <div className="text-2xl">{open ? "✓" : "🔒"}</div>
+                <div className="flex justify-center text-2xl">
+                  {open ? (
+                    <Illustration name="star" size={26} />
+                  ) : (
+                    <Illustration name="lock" size={26} />
+                  )}
+                </div>
                 <div className="text-sm font-semibold">
                   {OPERATION_LABELS[op]}
                 </div>
@@ -94,9 +103,10 @@ export default function StudentPortal() {
 
       <Link
         href="/leerling/winkel"
-        className="mt-6 block rounded-3xl border-2 border-purple py-5 text-center text-xl font-bold text-purple transition hover:bg-purple/5"
+        className="mt-6 flex items-center justify-center gap-2 rounded-3xl border-2 border-purple py-5 text-center text-xl font-bold text-purple transition hover:bg-purple/5"
       >
-        🛍️ Naar de winkel
+        <Illustration name="shop" size={28} />
+        Naar de winkel
       </Link>
     </main>
   );
