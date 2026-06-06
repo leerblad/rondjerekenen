@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { checkUnlock, nextOperation } from "@/lib/progress";
+import { checkUnlock } from "@/lib/progress";
+import { nextOperation } from "@/lib/math";
 
 type IncomingAnswer = {
   question: string;

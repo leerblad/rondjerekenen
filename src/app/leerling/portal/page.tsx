@@ -9,8 +9,8 @@ import {
   OPERATIONS,
   OPERATION_LABELS,
   Operation,
+  unlockedOperations,
 } from "@/lib/math";
-import { unlockedOperations } from "@/lib/progress";
 
 export default function StudentPortal() {
   const router = useRouter();

@@ -125,6 +125,18 @@ export function generateQuestion(
   return { question, answer, options, operation };
 }
 
+export function unlockedOperations(current: string): Operation[] {
+  const idx = OPERATIONS.indexOf(current as Operation);
+  if (idx === -1) return [OPERATIONS[0]];
+  return OPERATIONS.slice(0, idx + 1);
+}
+
+export function nextOperation(current: string): Operation | null {
+  const idx = OPERATIONS.indexOf(current as Operation);
+  if (idx === -1 || idx >= OPERATIONS.length - 1) return null;
+  return OPERATIONS[idx + 1];
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
