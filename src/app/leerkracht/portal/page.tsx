@@ -31,7 +31,81 @@ type ProgressData = {
     correct: number;
     pct: number;
   }[];
+  hardestQuestions: {
+    question: string;
+    total: number;
+    wrong: number;
+    pct_wrong: number;
+  }[];
+  dailyScores: {
+    date: string;
+    pct: number;
+  }[];
 };
+
+function barColor(pct: number) {
+  if (pct >= 80) return "#3AB54A";
+  if (pct >= 50) return "#F5C842";
+  return "#E8705A";
+}
+
+function DailyChart({ data }: { data: { date: string; pct: number }[] }) {
+  const W = 300;
+  const H = 150;
+  const padL = 28;
+  const padB = 18;
+  const padT = 6;
+  const chartW = W - padL;
+  const chartH = H - padB - padT;
+  const n = data.length || 1;
+  const slot = chartW / n;
+  const barW = slot * 0.6;
+
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Dagelijkse scores">
+      {/* y-axis labels + gridlines */}
+      {[0, 50, 100].map((y) => {
+        const yPos = padT + chartH - (y / 100) * chartH;
+        return (
+          <g key={y}>
+            <line
+              x1={padL}
+              y1={yPos}
+              x2={W}
+              y2={yPos}
+              stroke="#1A1A1A"
+              strokeOpacity={0.08}
+            />
+            <text x={padL - 4} y={yPos + 3} textAnchor="end" fontSize="8" fill="#1A1A1A" fillOpacity={0.5}>
+              {y}%
+            </text>
+          </g>
+        );
+      })}
+      {/* bars */}
+      {data.map((d, i) => {
+        const x = padL + i * slot + (slot - barW) / 2;
+        const h = (d.pct / 100) * chartH;
+        const y = padT + chartH - h;
+        return (
+          <g key={d.date}>
+            <rect x={x} y={y} width={barW} height={h} rx={1.5} fill={barColor(d.pct)} />
+            <text
+              x={x + barW / 2}
+              y={H - 6}
+              textAnchor="middle"
+              fontSize="7"
+              fill="#1A1A1A"
+              fillOpacity={0.5}
+            >
+              {Number(d.date.slice(8, 10))}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
 
 export default function Portal() {
   const router = useRouter();
@@ -241,6 +315,17 @@ export default function Portal() {
             {!progress && <p className="mt-6 text-dark/40">Laden...</p>}
             {progress && (
               <>
+                {progress.dailyScores && progress.dailyScores.length > 0 && (
+                  <>
+                    <h4 className="mt-6 font-semibold">
+                      Scores afgelopen 14 dagen
+                    </h4>
+                    <div className="mt-2 overflow-x-auto">
+                      <DailyChart data={progress.dailyScores} />
+                    </div>
+                  </>
+                )}
+
                 <h4 className="mt-6 font-semibold">Per onderdeel</h4>
                 <div className="mt-2 flex flex-col gap-2">
                   {progress.operationStats.map((s) => (
@@ -264,6 +349,31 @@ export default function Portal() {
                     <p className="text-sm text-dark/40">Nog geen sessies.</p>
                   )}
                 </div>
+
+                {progress.hardestQuestions &&
+                  progress.hardestQuestions.length > 0 && (
+                    <>
+                      <h4 className="mt-6 font-semibold">Moeilijkste sommen</h4>
+                      <div className="mt-2 flex flex-col gap-2">
+                        {progress.hardestQuestions.map((q) => (
+                          <div key={q.question}>
+                            <div className="flex justify-between text-sm">
+                              <span className="font-mono">{q.question}</span>
+                              <span className="font-mono">
+                                {q.pct_wrong}% fout
+                              </span>
+                            </div>
+                            <div className="h-2 rounded-full bg-cream">
+                              <div
+                                className="h-2 rounded-full bg-coral"
+                                style={{ width: `${q.pct_wrong}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
 
                 <h4 className="mt-6 font-semibold">Laatste sessies</h4>
                 <div className="mt-2 flex flex-col gap-1 text-sm">
