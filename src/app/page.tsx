@@ -1,38 +1,5 @@
 import Link from "next/link";
-
-function LogoMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const dims =
-    size === "lg"
-      ? { grid: "w-32 h-32", cell: "text-4xl rounded-2xl", gap: "gap-2" }
-      : size === "sm"
-        ? { grid: "w-14 h-14", cell: "text-lg rounded-xl", gap: "gap-1" }
-        : { grid: "w-20 h-20", cell: "text-2xl rounded-xl", gap: "gap-1.5" };
-
-  return (
-    <div className={`grid grid-cols-2 ${dims.grid} ${dims.gap}`}>
-      <div
-        className={`flex items-center justify-center bg-coral text-white font-extrabold ${dims.cell}`}
-      >
-        ○
-      </div>
-      <div
-        className={`flex items-center justify-center bg-yellow text-dark font-extrabold ${dims.cell}`}
-      >
-        +
-      </div>
-      <div
-        className={`flex items-center justify-center bg-purple text-white font-extrabold ${dims.cell}`}
-      >
-        =
-      </div>
-      <div
-        className={`flex items-center justify-center bg-green text-white font-extrabold ${dims.cell}`}
-      >
-        ●
-      </div>
-    </div>
-  );
-}
+import Image from "next/image";
 
 function RoleCard({
   title,
@@ -82,21 +49,18 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-6 py-12">
       {/* Hero */}
-      <header className="flex w-full items-center justify-between gap-8 rounded-3xl bg-dark px-10 py-14">
-        <div className="flex flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
-            Dagelijks rekenen
-          </p>
-          <h1 className="text-5xl font-extrabold uppercase leading-none tracking-wide text-coral sm:text-6xl">
-            Rondje<br />Rekenen
-          </h1>
-          <p className="max-w-sm text-base font-light text-white/60">
-            Reken je slimmer, rondje voor rondje.
-          </p>
-        </div>
-        <div className="hidden sm:block">
-          <LogoMark size="lg" />
-        </div>
+      <header className="flex w-full flex-col items-center gap-6 rounded-3xl bg-cream px-10 py-12 border border-black/5 shadow-sm">
+        <Image
+          src="/logo.jpg"
+          alt="Rondje Rekenen"
+          width={375}
+          height={225}
+          className="w-64 sm:w-80"
+          priority
+        />
+        <p className="max-w-sm text-center text-base text-dark/60">
+          Reken je slimmer, rondje voor rondje.
+        </p>
       </header>
 
       {/* Uitleg */}
