@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <clipPath id="shirtClip">
+      <path d="M16 10 L8 16 L13 22 L16 19 V42 H32 V19 L35 22 L40 16 L32 10 Q24 16 16 10 Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#shirtClip)">
+    <rect x="0" y="0" width="48" height="48" fill="#FAF6F0"/>
+    <rect x="0" y="14" width="48" height="5" fill="#8B7FC7"/>
+    <rect x="0" y="24" width="48" height="5" fill="#8B7FC7"/>
+    <rect x="0" y="34" width="48" height="5" fill="#8B7FC7"/>
+  </g>
+  <path d="M16 10 L8 16 L13 22 L16 19 V42 H32 V19 L35 22 L40 16 L32 10 Q24 16 16 10 Z" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+</svg>

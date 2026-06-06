@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- cup -->
+  <path d="M14 8 h20 v8 a10 10 0 0 1 -20 0 Z" fill="#F5C842" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- handles -->
+  <path d="M14 10 h-5 a4 4 0 0 0 0 8 h3" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+  <path d="M34 10 h5 a4 4 0 0 1 0 8 h-3" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+  <!-- stem -->
+  <rect x="21" y="26" width="6" height="7" fill="#E8705A"/>
+  <!-- base -->
+  <rect x="15" y="33" width="18" height="4" rx="1" fill="#8B7FC7" stroke="#1A1A1A" stroke-width="2"/>
+  <rect x="17" y="37" width="14" height="4" rx="1" fill="#8B7FC7" stroke="#1A1A1A" stroke-width="2"/>
+  <!-- star detail -->
+  <path d="M24 12 l1.5 3 3.3 0.4 -2.4 2.3 0.6 3.3 -3 -1.6 -3 1.6 0.6 -3.3 -2.4 -2.3 3.3 -0.4 Z" fill="#1A1A1A"/>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- body / shirt -->
+  <path d="M22 78 V60 a18 18 0 0 1 36 0 V78 Z" fill="#E8705A"/>
+  <!-- collar -->
+  <path d="M40 44 L31 54 L40 58 L49 54 Z" fill="#FAF6F0"/>
+  <!-- neck -->
+  <rect x="36" y="40" width="8" height="8" fill="#FDDCB5"/>
+  <!-- head -->
+  <circle cx="40" cy="28" r="15" fill="#FDDCB5"/>
+  <!-- hair -->
+  <path d="M25 27 a15 15 0 0 1 30 0 v-3 a15 15 0 0 0 -30 0 Z" fill="#1A1A1A"/>
+  <path d="M25 24 a15 15 0 0 1 30 0 h-4 a11 11 0 0 0 -22 0 Z" fill="#1A1A1A"/>
+  <!-- eyes -->
+  <circle cx="35" cy="28" r="1.8" fill="#1A1A1A"/>
+  <circle cx="45" cy="28" r="1.8" fill="#1A1A1A"/>
+  <!-- smile -->
+  <path d="M35 34 Q40 38 45 34" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- pointer stick -->
+  <line x1="60" y1="20" x2="74" y2="62" stroke="#8B7FC7" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="60" cy="20" r="3" fill="#F5C842"/>
+</svg>

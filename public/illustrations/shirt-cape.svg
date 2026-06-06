@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- cape -->
+  <path d="M14 12 Q6 30 4 44 L24 38 L44 44 Q42 30 34 12 Z" fill="#E8705A" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+  <!-- shirt over cape -->
+  <path d="M18 12 L24 18 L30 12 V40 H18 Z" fill="#F5C842" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+</svg>

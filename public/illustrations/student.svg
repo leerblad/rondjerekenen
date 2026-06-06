@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- backpack strap behind -->
+  <rect x="20" y="50" width="6" height="24" rx="3" fill="#3AB54A"/>
+  <rect x="54" y="50" width="6" height="24" rx="3" fill="#3AB54A"/>
+  <!-- backpack body -->
+  <rect x="48" y="54" width="18" height="22" rx="5" fill="#3AB54A"/>
+  <rect x="52" y="60" width="10" height="7" rx="2" fill="#FAF6F0"/>
+  <!-- body / shirt -->
+  <path d="M26 78 V62 a14 14 0 0 1 28 0 V78 Z" fill="#8B7FC7"/>
+  <!-- neck -->
+  <rect x="37" y="44" width="6" height="7" fill="#FDDCB5"/>
+  <!-- head -->
+  <circle cx="40" cy="34" r="12" fill="#FDDCB5"/>
+  <!-- hair -->
+  <path d="M28 33 a12 12 0 0 1 24 0 v-2 a12 12 0 0 0 -24 0 Z" fill="#1A1A1A"/>
+  <!-- eyes -->
+  <circle cx="36" cy="34" r="1.6" fill="#1A1A1A"/>
+  <circle cx="44" cy="34" r="1.6" fill="#1A1A1A"/>
+  <!-- smile -->
+  <path d="M36 39 Q40 42 44 39" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+</svg>
