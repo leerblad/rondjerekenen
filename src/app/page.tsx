@@ -61,12 +61,12 @@ export default function Home() {
           </p>
         </div>
         <Image
-          src="/logo-emblem.jpg"
+          src="/Rekenenlogo.jpg"
           alt="Rondje Rekenen"
-          width={280}
-          height={280}
-          className="w-[280px] rounded-2xl shadow-lg"
-          preload
+          width={400}
+          height={400}
+          className="w-full max-w-xs rounded-2xl shadow-lg sm:max-w-sm"
+          priority
         />
       </header>
 
