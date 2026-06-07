@@ -55,6 +55,22 @@ export default function StudentPortal() {
           <Illustration name="coin" size={20} />
           {student.coins} munten
         </p>
+        {!student.avatarUrl && (
+          <Link
+            href="/leerling/avatar"
+            className="rounded-full bg-purple px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Maak je 3D avatar →
+          </Link>
+        )}
+        {student.avatarUrl && (
+          <Link
+            href="/leerling/avatar"
+            className="text-xs text-dark/40 hover:text-purple"
+          >
+            Avatar aanpassen
+          </Link>
+        )}
       </div>
 
       <Link

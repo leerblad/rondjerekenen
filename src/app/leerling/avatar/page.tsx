@@ -1,15 +1,20 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import AvatarCreator from "@/components/AvatarCreator";
 
 export default function AvatarSetup() {
   const router = useRouter();
-  const { user, updateStudent } = useAuth();
+  const { user, ready, updateStudent } = useAuth();
   const student = user?.role === "student" ? user : null;
   const [saving, setSaving] = useState(false);
+
+  // Wait for auth — if not logged in, go back
+  useEffect(() => {
+    if (ready && !student) router.replace("/leerling");
+  }, [ready, student, router]);
 
   const handleCreated = useCallback(async (glbUrl: string) => {
     if (!student) return;
@@ -22,6 +27,15 @@ export default function AvatarSetup() {
     updateStudent({ avatarUrl: glbUrl });
     router.push("/leerling/portal");
   }, [student, updateStudent, router]);
+
+  // Don't render iframe until auth is ready
+  if (!ready || !student) {
+    return (
+      <main className="flex h-screen items-center justify-center bg-dark">
+        <p className="text-white/40">Laden...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex h-screen flex-col bg-dark">
