@@ -7,7 +7,7 @@ export default function Home() {
     <div className="min-h-screen bg-cream">
 
       {/* Nav */}
-      <nav className="flex items-center px-6 py-4 sm:px-10">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-10">
         <Image
           src="/Rekenenlogo.jpg"
           alt="Rondje Rekenen"
@@ -16,6 +16,20 @@ export default function Home() {
           className="h-12 w-auto object-contain"
           priority
         />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/leerkracht?tab=login"
+            className="rounded-full bg-coral px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Leerkracht
+          </Link>
+          <Link
+            href="/leerling?tab=login"
+            className="rounded-full bg-purple px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Leerling
+          </Link>
+        </div>
       </nav>
 
       {/* Hero */}
