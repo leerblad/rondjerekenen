@@ -50,35 +50,20 @@ function RoleCard({
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center px-6 py-12">
-      {/* Hero */}
-      <header className="flex w-full flex-col items-center gap-8 rounded-3xl bg-dark px-10 py-12 shadow-sm sm:flex-row sm:justify-between">
-        <div className="text-center sm:text-left">
-          <h1 className="text-5xl font-extrabold text-coral sm:text-6xl">
-            Rondje Rekenen
-          </h1>
-          <p className="mt-3 max-w-sm text-base text-white/70">
-            Reken je slimmer, rondje voor rondje.
-          </p>
-        </div>
+      {/* Logo */}
+      <header className="flex w-full justify-center">
         <Image
           src="/Rekenenlogo.jpg"
           alt="Rondje Rekenen"
-          width={400}
+          width={600}
           height={400}
-          className="w-full max-w-xs rounded-2xl shadow-lg sm:max-w-sm"
+          className="w-full max-w-lg rounded-3xl shadow-md"
           priority
         />
       </header>
 
-      {/* Uitleg */}
-      <p className="mt-10 max-w-xl text-center text-sm leading-relaxed text-dark/60">
-        Elke dag tien minuten rekenen voor groep 4 t/m 8. Oefen optellen,
-        aftrekken, vermenigvuldigen en delen — verdien munten en pas je avatar
-        aan. Leerkrachten volgen de voortgang van de hele klas.
-      </p>
-
       {/* Rolkaarten */}
-      <section className="mt-8 grid w-full gap-5 sm:grid-cols-2">
+      <section className="mt-10 grid w-full gap-5 sm:grid-cols-2">
         <RoleCard
           title="Ik ben leerkracht"
           icon={<Illustration name="teacher" size={56} />}
