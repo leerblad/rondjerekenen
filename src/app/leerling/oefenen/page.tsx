@@ -110,8 +110,8 @@ export default function Oefenen() {
       setTimeLeft(100);
       setInputValue("");
       startRef.current = Date.now();
-      // focus the input when the new question renders
-      setTimeout(() => inputRef.current?.focus(), 0);
+      // focus the input — use two ticks to ensure React has flushed state
+      setTimeout(() => inputRef.current?.focus(), 50);
 
       clearTimer();
       const start = Date.now();
@@ -247,7 +247,7 @@ export default function Oefenen() {
           flash === "green" ? "flash-green" : flash === "red" ? "flash-red" : ""
         }`}
       >
-        <p className="font-mono text-6xl font-bold sm:text-7xl">
+        <p className="whitespace-nowrap font-mono text-4xl font-bold sm:text-5xl">
           {question?.question}
         </p>
         {flash === "red" && question && (
@@ -273,15 +273,10 @@ export default function Oefenen() {
           disabled={locked}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          placeholder="?"
           className="w-full rounded-2xl border-4 border-transparent bg-white py-6 text-center font-mono text-5xl font-bold shadow-sm outline-none transition focus:border-coral disabled:opacity-60 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
-        <button
-          type="submit"
-          disabled={locked || inputValue.trim() === ""}
-          className="w-full rounded-2xl bg-coral py-4 text-xl font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
-        >
-          Controleer
-        </button>
+        <p className="text-center text-xs text-dark/30">Druk op Enter om te bevestigen</p>
       </form>
     </main>
   );
