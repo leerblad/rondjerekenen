@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import Avatar from "@/components/Avatar";
 import { Illustration } from "@/components/Illustration";
 import {
   OPERATIONS,
@@ -33,46 +32,26 @@ export default function StudentPortal() {
           ← Home
         </Link>
         <button
-          onClick={() => {
-            logout();
-            router.push("/");
-          }}
+          onClick={() => { logout(); router.push("/"); }}
           className="text-sm text-dark/50 hover:text-coral"
         >
           Uitloggen
         </button>
       </div>
 
+      {/* Welkom */}
       <div className="flex flex-col items-center gap-4 rounded-3xl bg-white p-8 text-center shadow-sm">
-        <Avatar
-          outfit={student.avatarOutfit}
-          operation={student.currentOperation}
-          size={130}
-          avatarUrl={student.avatarUrl}
-        />
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-coral/10 text-5xl">
+          🧒
+        </div>
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
-        <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2 font-mono text-lg font-bold text-dark">
-          <Illustration name="coin" size={20} />
+        <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-5 py-2 font-mono text-xl font-bold text-dark">
+          <Illustration name="coin" size={22} />
           {student.coins} munten
         </p>
-        {!student.avatarUrl && (
-          <Link
-            href="/leerling/avatar"
-            className="rounded-full bg-purple px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Maak je 3D avatar →
-          </Link>
-        )}
-        {student.avatarUrl && (
-          <Link
-            href="/leerling/avatar"
-            className="text-xs text-dark/40 hover:text-purple"
-          >
-            Avatar aanpassen
-          </Link>
-        )}
       </div>
 
+      {/* Oefenen knop */}
       <Link
         href="/leerling/oefenen"
         className="mt-6 flex items-center justify-center gap-3 rounded-3xl bg-coral py-8 text-center text-3xl font-extrabold text-white shadow-lg transition hover:opacity-90"
@@ -81,6 +60,7 @@ export default function StudentPortal() {
         <Illustration name="pencil" size={36} />
       </Link>
 
+      {/* Onderdelen */}
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="mb-3 font-bold">Jouw onderdelen</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -98,14 +78,14 @@ export default function StudentPortal() {
                       : "bg-cream text-dark/30"
                 }`}
               >
-                <div className="flex justify-center text-2xl">
+                <div className="flex justify-center">
                   {open ? (
                     <Illustration name="star" size={26} />
                   ) : (
                     <Illustration name="lock" size={26} />
                   )}
                 </div>
-                <div className="text-sm font-semibold">
+                <div className="mt-1 text-sm font-semibold">
                   {OPERATION_LABELS[op]}
                 </div>
               </div>
@@ -113,18 +93,9 @@ export default function StudentPortal() {
           })}
         </div>
         <p className="mt-4 text-center text-xs text-dark/40">
-          Haal 3 dagen achter elkaar 80% goed om het volgende onderdeel vrij te
-          spelen!
+          Haal 3 dagen achter elkaar 80% goed om het volgende onderdeel vrij te spelen!
         </p>
       </div>
-
-      <Link
-        href="/leerling/winkel"
-        className="mt-6 flex items-center justify-center gap-2 rounded-3xl border-2 border-purple py-5 text-center text-xl font-bold text-purple transition hover:bg-purple/5"
-      >
-        <Illustration name="shop" size={28} />
-        Naar de winkel
-      </Link>
     </main>
   );
 }
