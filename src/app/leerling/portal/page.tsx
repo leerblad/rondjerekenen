@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { Illustration } from "@/components/Illustration";
+import Image from "next/image";
 import {
   STAGES,
   STAGE_LABELS,
@@ -48,8 +49,12 @@ export default function StudentPortal() {
 
       {/* Welkom */}
       <div className="flex flex-col items-center gap-4 rounded-3xl bg-white p-8 text-center shadow-sm">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-coral/10 text-5xl">
-          🧒
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-coral/10">
+          {student.avatarUrl ? (
+            <Image src={student.avatarUrl} alt="avatar" width={96} height={96} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-5xl">🧒</span>
+          )}
         </div>
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
         <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-5 py-2 font-mono text-xl font-bold text-dark">

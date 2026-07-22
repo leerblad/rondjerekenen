@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   const { data } = await supabaseAdmin
     .from("teachers")
-    .select("id, name, class_code, password_hash")
+    .select("id, name, class_code, password_hash, avatar_url")
     .eq("name", name)
     .maybeSingle();
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   });
 
   const res = NextResponse.json({
-    teacher: { id: data.id, name: data.name, classCode: data.class_code },
+    teacher: { id: data.id, name: data.name, classCode: data.class_code, avatarUrl: data.avatar_url },
   });
   res.cookies.set("rr_token", token, {
     httpOnly: true,

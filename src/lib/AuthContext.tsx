@@ -13,6 +13,7 @@ export type TeacherUser = {
   id: string;
   name: string;
   classCode: string;
+  avatarUrl?: string;
 };
 
 export type StudentUser = {

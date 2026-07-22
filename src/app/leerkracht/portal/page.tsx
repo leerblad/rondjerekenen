@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
@@ -238,7 +239,14 @@ export default function Portal() {
         </button>
       </div>
 
-      <h1 className="text-3xl font-extrabold">Hoi {teacher.name} 👋</h1>
+      <div className="flex items-center gap-4">
+        {teacher.avatarUrl && (
+          <div className="h-16 w-16 overflow-hidden rounded-full bg-coral/10">
+            <Image src={teacher.avatarUrl} alt="avatar" width={64} height={64} className="h-full w-full object-cover" />
+          </div>
+        )}
+        <h1 className="text-3xl font-extrabold">Hoi {teacher.name} 👋</h1>
+      </div>
 
       <div className="mt-6 flex flex-col items-start gap-3 rounded-3xl bg-dark p-7 text-white sm:flex-row sm:items-center sm:justify-between">
         <div>

@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { makeClassCode, signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const { name, email, password } = await req.json();
+  const { name, email, password, avatarUrl } = await req.json();
   if (!name || !password || password.length < 6) {
     return NextResponse.json(
       { error: "Naam en wachtwoord (min. 6 tekens) zijn verplicht." },
@@ -28,8 +28,8 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabaseAdmin
     .from("teachers")
-    .insert({ name, email, password_hash, class_code })
-    .select("id, name, class_code")
+    .insert({ name, email, password_hash, class_code, avatar_url: avatarUrl || null })
+    .select("id, name, class_code, avatar_url")
     .single();
 
   if (error || !data) {
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   });
 
   const res = NextResponse.json({
-    teacher: { id: data.id, name: data.name, classCode: data.class_code },
+    teacher: { id: data.id, name: data.name, classCode: data.class_code, avatarUrl: data.avatar_url },
   });
   res.cookies.set("rr_token", token, {
     httpOnly: true,

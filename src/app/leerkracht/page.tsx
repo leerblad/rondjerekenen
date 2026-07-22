@@ -3,7 +3,17 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
+
+const TEACHER_AVATARS = [
+  { key: "leerkracht-man-boek", label: "Man met boek", ext: "webp" },
+  { key: "leerkracht-man-aarde", label: "Man met aardbol", ext: "png" },
+  { key: "leerkracht-man-liniaal", label: "Man met liniaal", ext: "png" },
+  { key: "leerkracht-vrouw-pen", label: "Vrouw met pen", ext: "png" },
+  { key: "leerkracht-vrouw-appel", label: "Vrouw met appel", ext: "png" },
+  { key: "leerkracht-vrouw-passer", label: "Vrouw met passer", ext: "png" },
+];
 
 function TeacherAuth() {
   const router = useRouter();
@@ -12,6 +22,7 @@ function TeacherAuth() {
   const [tab, setTab] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [avatar, setAvatar] = useState("leerkracht-vrouw-pen");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
@@ -32,9 +43,11 @@ function TeacherAuth() {
 
     setLoading(true);
     try {
+      const avatarExt = TEACHER_AVATARS.find((a) => a.key === avatar)?.ext ?? "png";
+      const avatarUrl = `/avatars/${avatar}.${avatarExt}`;
       const body =
         tab === "register"
-          ? { name, email, password }
+          ? { name, email, password, avatarUrl }
           : { name, password };
       const res = await fetch(`/api/auth/teacher/${tab}`, {
         method: "POST",
@@ -86,17 +99,42 @@ function TeacherAuth() {
           />
         </label>
         {tab === "register" && (
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">E-mailadres</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="rounded-xl border border-black/10 bg-white px-4 py-3"
-              placeholder="juf@school.nl"
-              required
-            />
-          </label>
+          <>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">E-mailadres</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-xl border border-black/10 bg-white px-4 py-3"
+                placeholder="juf@school.nl"
+                required
+              />
+            </label>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">Kies jouw figuur</span>
+              <div className="grid grid-cols-3 gap-2">
+                {TEACHER_AVATARS.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => setAvatar(a.key)}
+                    className={`flex flex-col items-center rounded-2xl border-4 bg-white p-2 transition ${
+                      avatar === a.key ? "border-coral" : "border-transparent"
+                    }`}
+                  >
+                    <Image
+                      src={`/avatars/${a.key}.${a.ext}`}
+                      alt={a.label}
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Wachtwoord</span>
@@ -129,11 +167,7 @@ function TeacherAuth() {
           disabled={loading}
           className="rounded-full bg-coral py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {loading
-            ? "Bezig..."
-            : tab === "login"
-              ? "Inloggen"
-              : "Account aanmaken"}
+          {loading ? "Bezig..." : tab === "login" ? "Inloggen" : "Account aanmaken"}
         </button>
       </form>
 

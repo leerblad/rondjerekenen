@@ -3,7 +3,15 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
+
+const STUDENT_AVATARS = [
+  { key: "leerling-jongen-1", label: "Jongen 1", ext: "png" },
+  { key: "leerling-jongen-2", label: "Jongen 2", ext: "png" },
+  { key: "leerling-meisje-1", label: "Meisje 1", ext: "png" },
+  { key: "leerling-meisje-2", label: "Meisje 2", ext: "png" },
+];
 
 function StudentAuth() {
   const router = useRouter();
@@ -13,6 +21,7 @@ function StudentAuth() {
   const [classCode, setClassCode] = useState("");
   const [nickname, setNickname] = useState("");
   const [grade, setGrade] = useState(4);
+  const [avatar, setAvatar] = useState("leerling-jongen-1");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
@@ -33,9 +42,11 @@ function StudentAuth() {
 
     setLoading(true);
     try {
+      const avatarExt = STUDENT_AVATARS.find((a) => a.key === avatar)?.ext ?? "png";
+      const avatarUrl = `/avatars/${avatar}.${avatarExt}`;
       const body =
         tab === "register"
-          ? { classCode, nickname, grade, ...(password ? { password } : {}) }
+          ? { classCode, nickname, grade, avatarUrl, ...(password ? { password } : {}) }
           : { classCode, nickname, ...(password ? { password } : {}) };
       const res = await fetch(`/api/auth/student/${tab}`, {
         method: "POST",
@@ -98,20 +109,45 @@ function StudentAuth() {
           />
         </label>
         {tab === "register" && (
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Welke groep zit jij in?</span>
-            <select
-              value={grade}
-              onChange={(e) => setGrade(Number(e.target.value))}
-              className="rounded-xl border border-black/10 bg-white px-4 py-3"
-            >
-              {[4, 5, 6, 7, 8].map((g) => (
-                <option key={g} value={g}>
-                  Groep {g}
-                </option>
-              ))}
-            </select>
-          </label>
+          <>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">Welke groep zit jij in?</span>
+              <select
+                value={grade}
+                onChange={(e) => setGrade(Number(e.target.value))}
+                className="rounded-xl border border-black/10 bg-white px-4 py-3"
+              >
+                {[4, 5, 6, 7, 8].map((g) => (
+                  <option key={g} value={g}>
+                    Groep {g}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">Kies jouw figuur</span>
+              <div className="grid grid-cols-4 gap-2">
+                {STUDENT_AVATARS.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => setAvatar(a.key)}
+                    className={`flex flex-col items-center rounded-2xl border-4 bg-white p-2 transition ${
+                      avatar === a.key ? "border-purple" : "border-transparent"
+                    }`}
+                  >
+                    <Image
+                      src={`/avatars/${a.key}.${a.ext}`}
+                      alt={a.label}
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">
@@ -143,11 +179,7 @@ function StudentAuth() {
           disabled={loading}
           className="rounded-full bg-purple py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {loading
-            ? "Bezig..."
-            : tab === "login"
-              ? "Inloggen"
-              : "Meedoen!"}
+          {loading ? "Bezig..." : tab === "login" ? "Inloggen" : "Meedoen!"}
         </button>
       </form>
     </main>

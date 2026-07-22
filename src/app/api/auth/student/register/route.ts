@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const { classCode, nickname, grade, password } = await req.json();
+  const { classCode, nickname, grade, password, avatarUrl } = await req.json();
   const code = String(classCode || "").toUpperCase().trim();
   const g = Number(grade);
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const insertData: Record<string, unknown> = { nickname, class_code: code, grade: g };
+  const insertData: Record<string, unknown> = { nickname, class_code: code, grade: g, avatar_url: avatarUrl || null };
   if (password && password.length >= 6) {
     insertData.password_hash = await bcrypt.hash(password, 10);
   }
