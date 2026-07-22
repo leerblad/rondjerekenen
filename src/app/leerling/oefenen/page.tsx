@@ -43,6 +43,7 @@ export default function Oefenen() {
   } | null>(null);
 
   const [inputValue, setInputValue] = useState("");
+  const submitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const answersRef = useRef<RecordedAnswer[]>([]);
   const startRef = useRef<number>(0);
@@ -109,6 +110,7 @@ export default function Oefenen() {
       setFlash(null);
       setTimeLeft(100);
       setInputValue("");
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
       startRef.current = Date.now();
       // focus the input — use two ticks to ensure React has flushed state
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -262,6 +264,7 @@ export default function Oefenen() {
         onSubmit={(e) => {
           e.preventDefault();
           if (locked || inputValue.trim() === "") return;
+          if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
           handleAnswer(parseInt(inputValue, 10));
         }}
       >
@@ -272,11 +275,19 @@ export default function Oefenen() {
           autoFocus
           disabled={locked}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setInputValue(val);
+            if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+            if (val.trim() !== "") {
+              submitTimerRef.current = setTimeout(() => {
+                handleAnswer(parseInt(val, 10));
+              }, 600);
+            }
+          }}
           placeholder="?"
           className="w-full rounded-2xl border-4 border-transparent bg-white py-6 text-center font-mono text-5xl font-bold shadow-sm outline-none transition focus:border-coral disabled:opacity-60 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
-        <p className="text-center text-xs text-dark/30">Druk op Enter om te bevestigen</p>
       </form>
     </main>
   );
