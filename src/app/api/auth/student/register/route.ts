@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const { classCode, nickname, grade } = await req.json();
+  const { classCode, nickname, grade, password } = await req.json();
   const code = String(classCode || "").toUpperCase().trim();
   const g = Number(grade);
 
@@ -27,9 +28,14 @@ export async function POST(req: Request) {
     );
   }
 
+  const insertData: Record<string, unknown> = { nickname, class_code: code, grade: g };
+  if (password && password.length >= 6) {
+    insertData.password_hash = await bcrypt.hash(password, 10);
+  }
+
   const { data, error } = await supabaseAdmin
     .from("students")
-    .insert({ nickname, class_code: code, grade: g })
+    .insert(insertData)
     .select(
       "id, nickname, class_code, grade, coins, current_operation, avatar_outfit, avatar_url"
     )

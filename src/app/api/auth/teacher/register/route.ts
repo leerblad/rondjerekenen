@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { makeClassCode, signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const { name, password } = await req.json();
+  const { name, email, password } = await req.json();
   if (!name || !password || password.length < 6) {
     return NextResponse.json(
       { error: "Naam en wachtwoord (min. 6 tekens) zijn verplicht." },
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabaseAdmin
     .from("teachers")
-    .insert({ name, password_hash, class_code })
+    .insert({ name, email, password_hash, class_code })
     .select("id, name, class_code")
     .single();
 

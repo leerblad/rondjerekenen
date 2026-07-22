@@ -13,6 +13,8 @@ function StudentAuth() {
   const [classCode, setClassCode] = useState("");
   const [nickname, setNickname] = useState("");
   const [grade, setGrade] = useState(4);
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,12 +25,18 @@ function StudentAuth() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (tab === "register" && password && password !== passwordConfirm) {
+      setError("Wachtwoorden komen niet overeen.");
+      return;
+    }
+
     setLoading(true);
     try {
       const body =
         tab === "register"
-          ? { classCode, nickname, grade }
-          : { classCode, nickname };
+          ? { classCode, nickname, grade, ...(password ? { password } : {}) }
+          : { classCode, nickname, ...(password ? { password } : {}) };
       const res = await fetch(`/api/auth/student/${tab}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -103,6 +111,31 @@ function StudentAuth() {
                 </option>
               ))}
             </select>
+          </label>
+        )}
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium">
+            Wachtwoord{tab === "login" ? "" : " (optioneel)"}
+          </span>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded-xl border border-black/10 bg-white px-4 py-3"
+            placeholder={tab === "login" ? "wachtwoord" : "laat leeg als je geen wachtwoord wil"}
+            minLength={password ? 6 : undefined}
+          />
+        </label>
+        {tab === "register" && password && (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Wachtwoord bevestigen</span>
+            <input
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              className="rounded-xl border border-black/10 bg-white px-4 py-3"
+              placeholder="herhaal wachtwoord"
+            />
           </label>
         )}
         {error && <p className="text-sm text-coral">{error}</p>}

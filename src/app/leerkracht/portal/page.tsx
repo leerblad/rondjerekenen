@@ -7,6 +7,14 @@ import { useAuth } from "@/lib/AuthContext";
 import { OPERATION_LABELS, Operation } from "@/lib/math";
 import { Illustration } from "@/components/Illustration";
 
+type Message = {
+  id: string;
+  subject: string;
+  body: string;
+  read: boolean;
+  sent_at: string;
+};
+
 type Row = {
   id: string;
   nickname: string;
@@ -115,6 +123,8 @@ export default function Portal() {
   const [copied, setCopied] = useState(false);
   const [selected, setSelected] = useState<Row | null>(null);
   const [progress, setProgress] = useState<ProgressData | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [openMsg, setOpenMsg] = useState<Message | null>(null);
 
   const teacher =
     user && user.role === "teacher" ? user : null;
@@ -123,6 +133,13 @@ export default function Portal() {
     if (ready && !teacher) router.replace("/leerkracht");
     if (teacher) setClassCode(teacher.classCode);
   }, [ready, teacher, router]);
+
+  useEffect(() => {
+    if (!teacher) return;
+    fetch("/api/leerkracht/messages")
+      .then((r) => r.json())
+      .then((d) => setMessages(d.messages ?? []));
+  }, [teacher]);
 
   const load = useCallback(async (code: string) => {
     const res = await fetch(`/api/leerkracht/${code}/students`);
@@ -176,10 +193,36 @@ export default function Portal() {
     setTimeout(() => setCopied(false), 1500);
   }
 
+  async function openMessage(msg: Message) {
+    setOpenMsg(msg);
+    if (!msg.read) {
+      await fetch("/api/leerkracht/messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: msg.id }),
+      });
+      setMessages((ms) => ms.map((m) => m.id === msg.id ? { ...m, read: true } : m));
+    }
+  }
+
   if (!ready || !teacher) return null;
+
+  const unread = messages.filter((m) => !m.read);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
+      {unread.length > 0 && (
+        <div
+          className="mb-6 rounded-2xl px-5 py-4 cursor-pointer"
+          style={{ background: "#F5C842" }}
+          onClick={() => setOpenMsg(messages[0])}
+        >
+          <p className="font-semibold text-dark">
+            📬 Je hebt {unread.length} nieuw{unread.length !== 1 ? "e" : ""} bericht{unread.length !== 1 ? "en" : ""} van de beheerder
+          </p>
+          <p className="text-sm text-dark/70 mt-0.5">Klik om te lezen</p>
+        </div>
+      )}
       <div className="mb-8 flex items-center justify-between">
         <Link href="/" className="text-sm text-dark/50 hover:text-coral">
           ← Home
@@ -288,6 +331,42 @@ export default function Portal() {
           </tbody>
         </table>
       </div>
+
+      {openMsg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setOpenMsg(null)}
+        >
+          <div
+            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">{openMsg.subject}</h3>
+              <button onClick={() => setOpenMsg(null)} className="text-dark/40">✕</button>
+            </div>
+            <p className="text-sm text-dark/50 mb-4">
+              {new Date(openMsg.sent_at).toLocaleString("nl-NL")}
+            </p>
+            <p className="text-dark/80 whitespace-pre-wrap">{openMsg.body}</p>
+            {messages.length > 1 && (
+              <div className="mt-6 border-t border-black/5 pt-4">
+                <p className="text-sm font-semibold mb-2">Alle berichten</p>
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`cursor-pointer py-2 text-sm border-b border-black/5 ${m.id === openMsg.id ? "font-semibold" : ""}`}
+                    onClick={() => openMessage(m)}
+                  >
+                    {!m.read && <span className="mr-1 text-coral">●</span>}
+                    {m.subject}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div

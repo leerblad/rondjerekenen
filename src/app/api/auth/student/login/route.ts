@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const { classCode, nickname } = await req.json();
+  const { classCode, nickname, password } = await req.json();
   const code = String(classCode || "").toUpperCase().trim();
 
   if (!code || !nickname) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
   const { data } = await supabaseAdmin
     .from("students")
     .select(
-      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit, avatar_url"
+      "id, nickname, class_code, grade, coins, current_operation, avatar_outfit, avatar_url, password_hash"
     )
     .eq("class_code", code)
     .eq("nickname", nickname)
@@ -24,6 +25,17 @@ export async function POST(req: Request) {
       { error: "Geen leerling gevonden met deze naam en klascode." },
       { status: 404 }
     );
+  }
+
+  // If the student has a password_hash, verify the password
+  if (data.password_hash) {
+    if (!password) {
+      return NextResponse.json({ error: "Vul je wachtwoord in." }, { status: 401 });
+    }
+    const valid = await bcrypt.compare(String(password), data.password_hash);
+    if (!valid) {
+      return NextResponse.json({ error: "Verkeerd wachtwoord." }, { status: 401 });
+    }
   }
 
   const token = await signToken({
