@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { checkUnlock } from "@/lib/progress";
-import { nextOperation } from "@/lib/math";
+import { MAX_LEVEL, STAGE_LABELS, levelToStage } from "@/lib/math";
 
 type IncomingAnswer = {
   question: string;
@@ -14,19 +14,20 @@ type IncomingAnswer = {
 const DAILY_COINS = 10;
 
 export async function POST(req: Request) {
-  const { studentId, operation, answers } = (await req.json()) as {
+  const { studentId, level, answers } = (await req.json()) as {
     studentId: string;
-    operation: string;
+    level: number;
     answers: IncomingAnswer[];
   };
 
-  if (!studentId || !operation || !Array.isArray(answers)) {
+  if (!studentId || !level || !Array.isArray(answers)) {
     return NextResponse.json({ error: "Ongeldige data." }, { status: 400 });
   }
 
   const total = answers.length;
   const correct = answers.filter((a) => a.isCorrect).length;
   const today = new Date().toISOString().slice(0, 10);
+  const operation = levelToStage(level);
 
   // create session
   const { data: session, error: sErr } = await supabaseAdmin
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       student_id: studentId,
       date: today,
       operation,
+      level,
       total,
       correct,
       completed: true,
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // award coins only once per day (first completed session of the day)
+  // award coins once per day
   const { count } = await supabaseAdmin
     .from("sessions")
     .select("id", { count: "exact", head: true })
@@ -69,7 +71,7 @@ export async function POST(req: Request) {
 
   const { data: student } = await supabaseAdmin
     .from("students")
-    .select("coins, current_operation")
+    .select("coins, level")
     .eq("id", studentId)
     .single();
 
@@ -80,23 +82,25 @@ export async function POST(req: Request) {
     newCoins += DAILY_COINS;
   }
 
-  // check for operation unlock
-  let unlocked: string | null = null;
-  let newOperation = student?.current_operation ?? operation;
-  if (newOperation === operation) {
-    const shouldUnlock = await checkUnlock(studentId, operation);
+  // check for level-up
+  let newLevel = student?.level ?? level;
+  let unlockedStageLabel: string | null = null;
+
+  if (newLevel === level && newLevel < MAX_LEVEL) {
+    const shouldUnlock = await checkUnlock(studentId, level);
     if (shouldUnlock) {
-      const next = nextOperation(operation);
-      if (next) {
-        newOperation = next;
-        unlocked = next;
+      newLevel = level + 1;
+      const newStage = levelToStage(newLevel);
+      const oldStage = levelToStage(level);
+      if (newStage !== oldStage) {
+        unlockedStageLabel = STAGE_LABELS[newStage];
       }
     }
   }
 
   await supabaseAdmin
     .from("students")
-    .update({ coins: newCoins, current_operation: newOperation })
+    .update({ coins: newCoins, level: newLevel })
     .eq("id", studentId);
 
   return NextResponse.json({
@@ -105,7 +109,7 @@ export async function POST(req: Request) {
     correct,
     coinsAwarded,
     coins: newCoins,
-    unlockedOperation: unlocked,
-    currentOperation: newOperation,
+    level: newLevel,
+    unlockedStageLabel,
   });
 }

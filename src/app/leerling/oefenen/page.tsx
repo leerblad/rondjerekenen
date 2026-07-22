@@ -9,8 +9,10 @@ import {
   generateQuestion,
   getSessionLength,
   getTimeLimit,
-  Operation,
-  OPERATION_LABELS,
+  levelToStage,
+  STAGE_LABELS,
+  withinStageLevel,
+  getUnlockThreshold,
   Question,
 } from "@/lib/math";
 
@@ -39,7 +41,8 @@ export default function Oefenen() {
     correct: number;
     total: number;
     coinsAwarded: number;
-    unlockedOperation: string | null;
+    unlockedStageLabel: string | null;
+    newLevel: number;
   } | null>(null);
 
   const [inputValue, setInputValue] = useState("");
@@ -51,10 +54,12 @@ export default function Oefenen() {
   const questionRef = useRef<Question | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const operation = (student?.currentOperation || "plus") as Operation;
-  const grade = student?.grade || 4;
-  const total = getSessionLength(grade);
-  const timeLimit = getTimeLimit(grade);
+  const level = student?.level ?? 1;
+  const total = getSessionLength();
+  const timeLimit = getTimeLimit(level);
+  const stage = levelToStage(level);
+  const wl = withinStageLevel(level);
+  const threshold = Math.round(getUnlockThreshold(level) * 100);
 
   useEffect(() => {
     if (ready && !student) router.replace("/leerling");
@@ -75,7 +80,7 @@ export default function Oefenen() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studentId: student.id,
-          operation,
+          level,
           answers: recorded,
         }),
       });
@@ -84,16 +89,14 @@ export default function Oefenen() {
         correct: data.correct ?? recorded.filter((a) => a.isCorrect).length,
         total: data.total ?? recorded.length,
         coinsAwarded: data.coinsAwarded ?? 0,
-        unlockedOperation: data.unlockedOperation ?? null,
+        unlockedStageLabel: data.unlockedStageLabel ?? null,
+        newLevel: data.level ?? level,
       });
       if (typeof data.coins === "number") {
-        updateStudent({
-          coins: data.coins,
-          currentOperation: data.currentOperation ?? student.currentOperation,
-        });
+        updateStudent({ coins: data.coins, level: data.level ?? level });
       }
     },
-    [student, operation, updateStudent]
+    [student, level, updateStudent]
   );
 
   const nextQuestion = useCallback(
@@ -102,7 +105,7 @@ export default function Oefenen() {
         finishSession(recorded);
         return;
       }
-      const q = generateQuestion(operation, grade);
+      const q = generateQuestion(level);
       questionRef.current = q;
       setQuestion(q);
       setIndex(recorded.length);
@@ -112,7 +115,6 @@ export default function Oefenen() {
       setInputValue("");
       if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
       startRef.current = Date.now();
-      // focus the input — use two ticks to ensure React has flushed state
       setTimeout(() => inputRef.current?.focus(), 50);
 
       clearTimer();
@@ -127,7 +129,7 @@ export default function Oefenen() {
       }, 50);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [operation, grade, total, timeLimit, finishSession]
+    [level, total, timeLimit, finishSession]
   );
 
   const handleAnswer = useCallback(
@@ -136,6 +138,7 @@ export default function Oefenen() {
       if (!q || locked) return;
       setLocked(true);
       clearTimer();
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
 
       const isCorrect = choice === q.answer;
       const responseTimeMs = Date.now() - startRef.current;
@@ -149,15 +152,11 @@ export default function Oefenen() {
       answersRef.current = [...answersRef.current, rec];
       setFlash(isCorrect ? "green" : "red");
 
-      setTimeout(
-        () => nextQuestion(answersRef.current),
-        isCorrect ? 350 : 900
-      );
+      setTimeout(() => nextQuestion(answersRef.current), isCorrect ? 350 : 900);
     },
     [locked, nextQuestion]
   );
 
-  // start the session once
   const startedRef = useRef(false);
   useEffect(() => {
     if (ready && student && !startedRef.current) {
@@ -174,11 +173,7 @@ export default function Oefenen() {
     const s = summary;
     const pct = s && s.total ? Math.round((s.correct / s.total) * 100) : 0;
     const message =
-      pct >= 80
-        ? "Geweldig gedaan!"
-        : pct >= 50
-          ? "Goed bezig!"
-          : "Blijf oefenen!";
+      pct >= 80 ? "Geweldig gedaan!" : pct >= 50 ? "Goed bezig!" : "Blijf oefenen!";
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
         <h1 className="text-3xl font-extrabold">Klaar!</h1>
@@ -197,11 +192,12 @@ export default function Oefenen() {
                 <Illustration name="coin" size={20} />
               </p>
             )}
-            {s.unlockedOperation && (
+            {s.newLevel > level && (
               <p className="flex items-center justify-center gap-2 rounded-2xl bg-green/15 px-4 py-3 font-semibold text-green">
                 <Illustration name="confetti" size={28} />
-                Nieuw onderdeel vrijgespeeld:{" "}
-                {OPERATION_LABELS[s.unlockedOperation as Operation]}!
+                {s.unlockedStageLabel
+                  ? `Nieuw onderdeel: ${s.unlockedStageLabel}!`
+                  : `Level ${s.newLevel} bereikt!`}
               </p>
             )}
             <Link
@@ -225,8 +221,13 @@ export default function Oefenen() {
         </span>
       </div>
 
+      {/* stage + level info */}
+      <div className="mt-1 text-center text-xs text-dark/40">
+        {STAGE_LABELS[stage]} — level {wl}/20 — doel: {threshold}%
+      </div>
+
       {/* progress */}
-      <div className="mt-3 h-2 rounded-full bg-white">
+      <div className="mt-2 h-2 rounded-full bg-white">
         <div
           className="h-2 rounded-full bg-purple transition-all"
           style={{ width: `${(index / total) * 100}%` }}
@@ -237,10 +238,7 @@ export default function Oefenen() {
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-white">
         <div
           className="h-3 rounded-full bg-coral"
-          style={{
-            width: `${timeLeft}%`,
-            transition: "width 50ms linear",
-          }}
+          style={{ width: `${timeLeft}%`, transition: "width 50ms linear" }}
         />
       </div>
 
@@ -253,9 +251,7 @@ export default function Oefenen() {
           {question?.question}
         </p>
         {flash === "red" && question && (
-          <p className="mt-4 text-lg text-coral">
-            Juiste antwoord: {question.answer}
-          </p>
+          <p className="mt-4 text-lg text-coral">Juiste antwoord: {question.answer}</p>
         )}
       </div>
 

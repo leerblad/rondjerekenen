@@ -6,10 +6,13 @@ import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { Illustration } from "@/components/Illustration";
 import {
-  OPERATIONS,
-  OPERATION_LABELS,
-  Operation,
-  unlockedOperations,
+  STAGES,
+  STAGE_LABELS,
+  LEVELS_PER_STAGE,
+  MAX_LEVEL,
+  levelToStage,
+  withinStageLevel,
+  getUnlockThreshold,
 } from "@/lib/math";
 
 export default function StudentPortal() {
@@ -23,7 +26,11 @@ export default function StudentPortal() {
 
   if (!ready || !student) return null;
 
-  const unlocked = unlockedOperations(student.currentOperation);
+  const level = student.level ?? 1;
+  const stage = levelToStage(level);
+  const wl = withinStageLevel(level);
+  const threshold = Math.round(getUnlockThreshold(level) * 100);
+  const stageIndex = STAGES.indexOf(stage);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
@@ -51,6 +58,33 @@ export default function StudentPortal() {
         </p>
       </div>
 
+      {/* Level info */}
+      <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-xl font-extrabold">
+            Level {level}
+            {level >= MAX_LEVEL && " 🏆"}
+          </h2>
+          <span className="text-sm text-dark/50">
+            {STAGE_LABELS[stage]} — {wl}/20
+          </span>
+        </div>
+
+        {/* within-stage progress bar */}
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-cream">
+          <div
+            className="h-3 rounded-full bg-purple transition-all"
+            style={{ width: `${((wl - 1) / LEVELS_PER_STAGE) * 100}%` }}
+          />
+        </div>
+
+        {level < MAX_LEVEL && (
+          <p className="mt-3 text-center text-sm text-dark/50">
+            Haal 3 dagen achter elkaar {threshold}% goed om naar level {level + 1} te gaan
+          </p>
+        )}
+      </div>
+
       {/* Oefenen knop */}
       <Link
         href="/leerling/oefenen"
@@ -60,41 +94,44 @@ export default function StudentPortal() {
         <Illustration name="pencil" size={36} />
       </Link>
 
-      {/* Onderdelen */}
+      {/* Fase overzicht */}
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-bold">Jouw onderdelen</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {OPERATIONS.map((op: Operation) => {
-            const open = unlocked.includes(op);
-            const current = op === student.currentOperation;
+        <h2 className="mb-3 font-bold">Jouw parcours</h2>
+        <div className="flex flex-col gap-2">
+          {STAGES.map((s, i) => {
+            const done = i < stageIndex;
+            const current = i === stageIndex;
             return (
               <div
-                key={op}
-                className={`rounded-2xl p-4 text-center ${
+                key={s}
+                className={`flex items-center justify-between rounded-2xl px-4 py-3 ${
                   current
-                    ? "bg-green text-white"
-                    : open
+                    ? "bg-purple text-white"
+                    : done
                       ? "bg-green/15 text-green"
                       : "bg-cream text-dark/30"
                 }`}
               >
-                <div className="flex justify-center">
-                  {open ? (
-                    <Illustration name="star" size={26} />
+                <div className="flex items-center gap-2">
+                  {done ? (
+                    <Illustration name="star" size={20} />
+                  ) : current ? (
+                    <Illustration name="pencil" size={20} />
                   ) : (
-                    <Illustration name="lock" size={26} />
+                    <Illustration name="lock" size={20} />
                   )}
+                  <span className="font-semibold">{STAGE_LABELS[s]}</span>
                 </div>
-                <div className="mt-1 text-sm font-semibold">
-                  {OPERATION_LABELS[op]}
-                </div>
+                {current && (
+                  <span className="text-sm font-mono opacity-80">{wl}/20</span>
+                )}
+                {done && (
+                  <span className="text-sm font-mono opacity-70">✓</span>
+                )}
               </div>
             );
           })}
         </div>
-        <p className="mt-4 text-center text-xs text-dark/40">
-          Haal 3 dagen achter elkaar 80% goed om het volgende onderdeel vrij te spelen!
-        </p>
       </div>
     </main>
   );

@@ -1,17 +1,22 @@
 import { supabaseAdmin } from "@/lib/supabase";
-import { OPERATIONS, Operation } from "@/lib/math";
+import { getUnlockThreshold } from "@/lib/math";
 
-// Check the last 3 *distinct days* of completed sessions for the student's
-// current operation. If each of those 3 days had >= 80% correct, return true.
+/**
+ * Check whether the student has earned a level-up.
+ * Returns true if the last 3 distinct calendar days at `level`
+ * all meet the unlock threshold for that level.
+ */
 export async function checkUnlock(
   studentId: string,
-  currentOperation: string
+  level: number
 ): Promise<boolean> {
+  const threshold = getUnlockThreshold(level);
+
   const { data: sessions } = await supabaseAdmin
     .from("sessions")
     .select("date, total, correct")
     .eq("student_id", studentId)
-    .eq("operation", currentOperation)
+    .eq("level", level)
     .eq("completed", true)
     .order("date", { ascending: false });
 
@@ -32,8 +37,5 @@ export async function checkUnlock(
 
   if (days.length < 3) return false;
 
-  return days.every(
-    ([, v]) => v.total > 0 && v.correct / v.total >= 0.8
-  );
+  return days.every(([, v]) => v.total > 0 && v.correct / v.total >= threshold);
 }
-
