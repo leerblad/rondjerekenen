@@ -11,7 +11,9 @@ function TeacherAuth() {
   const { setUser } = useAuth();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,12 +24,22 @@ function TeacherAuth() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (tab === "register" && password !== passwordConfirm) {
+      setError("Wachtwoorden komen niet overeen.");
+      return;
+    }
+
     setLoading(true);
     try {
+      const body =
+        tab === "register"
+          ? { name, email, password }
+          : { name, password };
       const res = await fetch(`/api/auth/teacher/${tab}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, password }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -73,6 +85,19 @@ function TeacherAuth() {
             required
           />
         </label>
+        {tab === "register" && (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">E-mailadres</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-xl border border-black/10 bg-white px-4 py-3"
+              placeholder="juf@school.nl"
+              required
+            />
+          </label>
+        )}
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Wachtwoord</span>
           <input
@@ -85,6 +110,20 @@ function TeacherAuth() {
             required
           />
         </label>
+        {tab === "register" && (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Wachtwoord bevestigen</span>
+            <input
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              className="rounded-xl border border-black/10 bg-white px-4 py-3"
+              placeholder="herhaal wachtwoord"
+              minLength={6}
+              required
+            />
+          </label>
+        )}
         {error && <p className="text-sm text-coral">{error}</p>}
         <button
           disabled={loading}
@@ -97,6 +136,15 @@ function TeacherAuth() {
               : "Account aanmaken"}
         </button>
       </form>
+
+      {tab === "login" && (
+        <p className="mt-4 text-center text-sm text-dark/50">
+          Wachtwoord vergeten?{" "}
+          <Link href="/leerkracht/reset" className="text-coral hover:underline">
+            Klik hier
+          </Link>
+        </p>
+      )}
     </main>
   );
 }
