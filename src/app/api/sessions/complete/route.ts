@@ -12,11 +12,13 @@ type IncomingAnswer = {
 };
 
 const DAILY_COINS = 10;
+const BONUS_COINS = 20;
 
 export async function POST(req: Request) {
-  const { studentId, level, answers } = (await req.json()) as {
+  const { studentId, level, bonus, answers } = (await req.json()) as {
     studentId: string;
     level: number;
+    bonus?: boolean;
     answers: IncomingAnswer[];
   };
 
@@ -37,6 +39,7 @@ export async function POST(req: Request) {
       date: today,
       operation,
       level,
+      bonus: bonus ?? false,
       total,
       correct,
       completed: true,
@@ -77,7 +80,10 @@ export async function POST(req: Request) {
 
   let coinsAwarded = 0;
   let newCoins = student?.coins ?? 0;
-  if ((count ?? 0) <= 1) {
+  if (bonus) {
+    coinsAwarded = BONUS_COINS;
+    newCoins += BONUS_COINS;
+  } else if ((count ?? 0) <= 1) {
     coinsAwarded = DAILY_COINS;
     newCoins += DAILY_COINS;
   }

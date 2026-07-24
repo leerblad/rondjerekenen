@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import { Illustration } from "@/components/Illustration";
@@ -26,8 +26,10 @@ type RecordedAnswer = {
 
 type Flash = "green" | "red" | null;
 
-export default function Oefenen() {
+function OefelenInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const isBonus = params.get("bonus") === "1";
   const { user, ready, updateStudent } = useAuth();
   const student = user && user.role === "student" ? user : null;
 
@@ -56,7 +58,7 @@ export default function Oefenen() {
 
   const level = student?.level ?? 1;
   const total = getSessionLength();
-  const timeLimit = getTimeLimit(level);
+  const timeLimit = isBonus ? Math.round(getTimeLimit(level) * 0.5) : getTimeLimit(level);
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
   const threshold = Math.round(getUnlockThreshold(level) * 100);
@@ -81,6 +83,7 @@ export default function Oefenen() {
         body: JSON.stringify({
           studentId: student.id,
           level,
+          bonus: isBonus,
           answers: recorded,
         }),
       });
@@ -176,7 +179,7 @@ export default function Oefenen() {
       pct >= 80 ? "Geweldig gedaan!" : pct >= 50 ? "Goed bezig!" : "Blijf oefenen!";
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
-        <h1 className="text-3xl font-extrabold">Klaar!</h1>
+        <h1 className="text-3xl font-extrabold">{isBonus ? "Bonus klaar! ⚡" : "Klaar!"}</h1>
         {!s ? (
           <p className="text-dark/40">Opslaan...</p>
         ) : (
@@ -237,7 +240,7 @@ export default function Oefenen() {
       {/* countdown */}
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-white">
         <div
-          className="h-3 rounded-full bg-coral"
+          className={`h-3 rounded-full ${isBonus ? "bg-yellow" : "bg-coral"}`}
           style={{ width: `${timeLeft}%`, transition: "width 50ms linear" }}
         />
       </div>
@@ -287,4 +290,8 @@ export default function Oefenen() {
       </form>
     </main>
   );
+}
+
+export default function OefelenPage() {
+  return <Suspense><OefelenInner /></Suspense>;
 }

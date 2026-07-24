@@ -24,6 +24,7 @@ export type StudentUser = {
   grade: number;
   coins: number;
   level: number;
+  background?: string;
   currentOperation: string;
   avatarOutfit: Record<string, string>;
   avatarUrl?: string;

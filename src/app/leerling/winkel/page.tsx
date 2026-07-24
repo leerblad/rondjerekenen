@@ -1,9 +1,185 @@
 "use client";
-import { useEffect } from "react";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { useAuth } from "@/lib/AuthContext";
+import { Illustration } from "@/components/Illustration";
+
+type ShopItem = {
+  key: string;
+  label: string;
+  category: "color" | "pattern" | "image";
+  price: number;
+  preview: React.ReactNode;
+};
+
+const COLORS: ShopItem[] = [
+  { key: "color-green",  label: "Groen",  category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-green" /> },
+  { key: "color-red",    label: "Rood",   category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-coral" /> },
+  { key: "color-blue",   label: "Blauw",  category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-blue-400" /> },
+  { key: "color-purple", label: "Paars",  category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-purple" /> },
+  { key: "color-yellow", label: "Geel",   category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-yellow" /> },
+  { key: "color-pink",   label: "Roze",   category: "color", price: 50, preview: <div className="h-full w-full rounded-xl bg-pink-300" /> },
+];
+
+const PATTERNS: ShopItem[] = [
+  {
+    key: "pattern-stripes", label: "Strepen", category: "pattern", price: 100,
+    preview: <div className="h-full w-full rounded-xl" style={{ background: "repeating-linear-gradient(45deg,#a78bfa,#a78bfa 8px,#fff 8px,#fff 16px)" }} />,
+  },
+  {
+    key: "pattern-dots", label: "Bolletjes", category: "pattern", price: 100,
+    preview: <div className="h-full w-full rounded-xl" style={{ background: "radial-gradient(circle,#f97066 3px,transparent 3px) 0 0/16px 16px,#fef3c7" }} />,
+  },
+  {
+    key: "pattern-zigzag", label: "Zigzag", category: "pattern", price: 100,
+    preview: <div className="h-full w-full rounded-xl" style={{ background: "linear-gradient(135deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(225deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(315deg,#4ade80 25%,transparent 25%),linear-gradient(45deg,#4ade80 25%,transparent 25%),#fff", backgroundSize: "20px 20px" }} />,
+  },
+  {
+    key: "pattern-stars", label: "Sterren", category: "pattern", price: 100,
+    preview: <div className="h-full w-full rounded-xl bg-purple" style={{ backgroundImage: "radial-gradient(circle,#fef08a 2px,transparent 2px)", backgroundSize: "14px 14px" }} />,
+  },
+];
+
+const IMAGES: ShopItem[] = [1, 2, 3, 4, 5].map((n) => ({
+  key: `image-${n}`,
+  label: `Achtergrond ${n}`,
+  category: "image" as const,
+  price: 150,
+  preview: (
+    <div className="relative h-full w-full">
+      <Image
+        src={`/backgrounds/achtergrond-${n}.jpg`}
+        alt={`Achtergrond ${n}`}
+        fill
+        className="rounded-xl object-cover"
+      />
+    </div>
+  ),
+}));
+
+export function backgroundStyle(bg: string | null | undefined): React.CSSProperties {
+  if (!bg) return {};
+  if (bg.startsWith("color-")) {
+    const map: Record<string, string> = {
+      "color-green": "#4ade80",
+      "color-red": "#f97066",
+      "color-blue": "#60a5fa",
+      "color-purple": "#a78bfa",
+      "color-yellow": "#fde047",
+      "color-pink": "#f9a8d4",
+    };
+    return { background: map[bg] ?? "#e5e7eb" };
+  }
+  if (bg === "pattern-stripes") return { background: "repeating-linear-gradient(45deg,#a78bfa,#a78bfa 8px,#fff 8px,#fff 16px)" };
+  if (bg === "pattern-dots") return { background: "radial-gradient(circle,#f97066 3px,transparent 3px) 0 0/16px 16px,#fef3c7" };
+  if (bg === "pattern-zigzag") return { background: "linear-gradient(135deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(225deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(315deg,#4ade80 25%,transparent 25%),linear-gradient(45deg,#4ade80 25%,transparent 25%),#fff", backgroundSize: "20px 20px" };
+  if (bg === "pattern-stars") return { background: "#a78bfa", backgroundImage: "radial-gradient(circle,#fef08a 2px,transparent 2px)", backgroundSize: "14px 14px" };
+  if (bg.startsWith("image-")) {
+    const n = bg.split("-")[1];
+    return { backgroundImage: `url(/backgrounds/achtergrond-${n}.jpg)`, backgroundSize: "cover", backgroundPosition: "center" };
+  }
+  return {};
+}
 
 export default function Winkel() {
   const router = useRouter();
-  useEffect(() => { router.replace("/leerling/portal"); }, [router]);
-  return null;
+  const { user, updateStudent } = useAuth();
+  const student = user?.role === "student" ? user : null;
+
+  const [buying, setBuying] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  if (!student) {
+    if (typeof window !== "undefined") router.replace("/leerling");
+    return null;
+  }
+
+  async function buy(item: ShopItem) {
+    if (!student) return;
+    setError("");
+    setBuying(item.key);
+    const res = await fetch("/api/leerling/koop", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, background: item.key, category: item.category }),
+    });
+    const data = await res.json();
+    setBuying(null);
+    if (!res.ok) { setError(data.error || "Mislukt."); return; }
+    updateStudent({ coins: data.coins, background: item.key } as never);
+  }
+
+  const currentBg = (student as typeof student & { background?: string }).background;
+
+  return (
+    <main className="mx-auto max-w-2xl px-6 py-10">
+      <div className="mb-6 flex items-center justify-between">
+        <Link href="/leerling/portal" className="text-sm text-dark/50 hover:text-coral">← Terug</Link>
+        <p className="flex items-center gap-2 font-mono font-bold">
+          <Illustration name="coin" size={18} />
+          {student.coins} munten
+        </p>
+      </div>
+
+      <h1 className="mb-2 text-3xl font-extrabold">Winkel</h1>
+      <p className="mb-8 text-sm text-dark/50">Koop een achtergrond voor jouw avatar!</p>
+
+      {error && <p className="mb-4 text-sm text-coral">{error}</p>}
+
+      {[
+        { title: "Effen kleuren", subtitle: "50 munten", items: COLORS },
+        { title: "Patronen", subtitle: "100 munten", items: PATTERNS },
+        { title: "Afbeeldingen", subtitle: "150 munten", items: IMAGES },
+      ].map(({ title, subtitle, items }) => (
+        <section key={title} className="mb-8">
+          <div className="mb-3 flex items-baseline gap-2">
+            <h2 className="font-bold">{title}</h2>
+            <span className="text-xs text-dark/40">{subtitle}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {items.map((item) => {
+              const owned = currentBg === item.key;
+              const canAfford = student.coins >= item.price;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => buy(item)}
+                  disabled={!!buying}
+                  className={`relative flex flex-col items-center gap-1 rounded-2xl border-4 p-1 transition ${
+                    owned ? "border-purple" : "border-transparent hover:border-black/10"
+                  } ${!canAfford && !owned ? "opacity-40" : ""}`}
+                >
+                  <div className="relative h-16 w-full overflow-hidden rounded-xl bg-cream">
+                    {item.preview}
+                  </div>
+                  <span className="text-xs font-semibold">{item.label}</span>
+                  {owned && (
+                    <span className="absolute -right-1 -top-1 rounded-full bg-purple px-1.5 py-0.5 text-[10px] font-bold text-white">✓</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+
+      {currentBg && (
+        <div className="mt-4 rounded-3xl bg-white p-6 text-center shadow-sm">
+          <p className="mb-3 font-bold">Jouw avatar</p>
+          <div
+            className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full"
+            style={backgroundStyle(currentBg)}
+          >
+            {student.avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={student.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+            )}
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }

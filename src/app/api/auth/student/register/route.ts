@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     .from("students")
     .insert(insertData)
     .select(
-      "id, nickname, class_code, grade, coins, level, current_operation, avatar_outfit, avatar_url"
+      "id, nickname, class_code, grade, coins, level, background, current_operation, avatar_outfit, avatar_url"
     )
     .single();
 
@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       grade: data.grade,
       coins: data.coins,
       level: data.level ?? 1,
+      background: data.background ?? null,
       currentOperation: data.current_operation,
       avatarOutfit: data.avatar_outfit,
       avatarUrl: data.avatar_url,
