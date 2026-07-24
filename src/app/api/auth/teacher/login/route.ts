@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   const { data } = await supabaseAdmin
     .from("teachers")
-    .select("id, name, class_code, password_hash, avatar_url")
+    .select("id, name, class_code, password_hash")
     .eq("name", name)
     .maybeSingle();
 
@@ -22,6 +22,13 @@ export async function POST(req: Request) {
     );
   }
 
+  // Fetch avatar separately — column may not exist on older DB schemas
+  const { data: extra } = await supabaseAdmin
+    .from("teachers")
+    .select("avatar_url")
+    .eq("id", data.id)
+    .maybeSingle();
+
   const token = await signToken({
     role: "teacher",
     id: data.id,
@@ -30,7 +37,7 @@ export async function POST(req: Request) {
   });
 
   const res = NextResponse.json({
-    teacher: { id: data.id, name: data.name, classCode: data.class_code, avatarUrl: data.avatar_url },
+    teacher: { id: data.id, name: data.name, classCode: data.class_code, avatarUrl: extra?.avatar_url ?? null },
   });
   res.cookies.set("rr_token", token, {
     httpOnly: true,
