@@ -37,14 +37,14 @@ export async function POST(req: Request) {
     .from("students")
     .insert(insertData)
     .select(
-      "id, nickname, class_code, grade, coins, level, background, current_operation, avatar_outfit, avatar_url"
+      "id, nickname, class_code, grade, coins, level, background, owned_backgrounds, current_operation, avatar_outfit, avatar_url"
     )
     .single();
 
   if (error || !data) {
     if (error?.code === "23505") {
       return NextResponse.json(
-        { error: "Deze naam bestaat al in jouw klas. Kies een andere." },
+        { error: "Deze naam is al in gebruik. Kies een andere." },
         { status: 409 }
       );
     }
@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       coins: data.coins,
       level: data.level ?? 1,
       background: data.background ?? null,
+      ownedBackgrounds: data.owned_backgrounds ?? [],
       currentOperation: data.current_operation,
       avatarOutfit: data.avatar_outfit,
       avatarUrl: data.avatar_url,

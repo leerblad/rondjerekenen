@@ -24,26 +24,33 @@ export async function POST(req: Request) {
 
   const { data: student } = await supabaseAdmin
     .from("students")
-    .select("coins, background")
+    .select("coins, background, owned_backgrounds")
     .eq("id", studentId)
     .single();
 
   if (!student) return NextResponse.json({ error: "Leerling niet gevonden." }, { status: 404 });
 
-  // Already owns this background — no charge
-  if (student.background === background) {
-    return NextResponse.json({ coins: student.coins, background });
+  const owned: string[] = student.owned_backgrounds ?? [];
+  const alreadyOwned = owned.includes(background);
+
+  if (!alreadyOwned) {
+    if (student.coins < price) {
+      return NextResponse.json({ error: "Niet genoeg munten." }, { status: 402 });
+    }
+    const newCoins = student.coins - price;
+    const newOwned = [...owned, background];
+    await supabaseAdmin
+      .from("students")
+      .update({ coins: newCoins, background, owned_backgrounds: newOwned })
+      .eq("id", studentId);
+    return NextResponse.json({ coins: newCoins, background, ownedBackgrounds: newOwned });
   }
 
-  if (student.coins < price) {
-    return NextResponse.json({ error: "Niet genoeg munten." }, { status: 402 });
-  }
-
-  const newCoins = student.coins - price;
+  // Already owned — just switch active background, no charge
   await supabaseAdmin
     .from("students")
-    .update({ coins: newCoins, background })
+    .update({ background })
     .eq("id", studentId);
 
-  return NextResponse.json({ coins: newCoins, background });
+  return NextResponse.json({ coins: student.coins, background, ownedBackgrounds: owned });
 }

@@ -113,10 +113,11 @@ export default function Winkel() {
     const data = await res.json();
     setBuying(null);
     if (!res.ok) { setError(data.error || "Mislukt."); return; }
-    updateStudent({ coins: data.coins, background: data.background });
+    updateStudent({ coins: data.coins, background: data.background, ownedBackgrounds: data.ownedBackgrounds });
   }
 
   const currentBg = student.background;
+  const ownedBgs: string[] = student.ownedBackgrounds ?? [];
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
@@ -145,7 +146,8 @@ export default function Winkel() {
           </div>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             {items.map((item) => {
-              const owned = currentBg === item.key;
+              const owned = ownedBgs.includes(item.key);
+              const active = currentBg === item.key;
               const canAfford = student.coins >= item.price;
               return (
                 <button
@@ -153,7 +155,7 @@ export default function Winkel() {
                   onClick={() => buy(item)}
                   disabled={!!buying}
                   className={`relative flex flex-col items-center gap-1 rounded-2xl border-4 p-1 transition ${
-                    owned ? "border-purple" : "border-transparent hover:border-black/10"
+                    active ? "border-purple" : owned ? "border-green" : "border-transparent hover:border-black/10"
                   } ${!canAfford && !owned ? "opacity-40" : ""}`}
                 >
                   <div className="relative h-16 w-full overflow-hidden rounded-xl bg-cream">
@@ -161,7 +163,7 @@ export default function Winkel() {
                   </div>
                   <span className="text-xs font-semibold">{item.label}</span>
                   {owned && (
-                    <span className="absolute -right-1 -top-1 rounded-full bg-purple px-1.5 py-0.5 text-[10px] font-bold text-white">✓</span>
+                    <span className={`absolute -right-1 -top-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white ${active ? "bg-purple" : "bg-green"}`}>✓</span>
                   )}
                 </button>
               );

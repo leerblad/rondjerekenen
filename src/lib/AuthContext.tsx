@@ -25,6 +25,7 @@ export type StudentUser = {
   coins: number;
   level: number;
   background?: string;
+  ownedBackgrounds: string[];
   currentOperation: string;
   avatarOutfit: Record<string, string>;
   avatarUrl?: string;

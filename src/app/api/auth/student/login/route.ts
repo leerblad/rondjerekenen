@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const { data } = await supabaseAdmin
     .from("students")
     .select(
-      "id, nickname, class_code, grade, coins, level, background, current_operation, avatar_outfit, avatar_url, password_hash"
+      "id, nickname, class_code, grade, coins, level, background, owned_backgrounds, current_operation, avatar_outfit, avatar_url, password_hash"
     )
     .eq("class_code", code)
     .eq("nickname", nickname)
@@ -53,6 +53,7 @@ export async function POST(req: Request) {
       coins: data.coins,
       level: data.level ?? 1,
       background: data.background ?? null,
+      ownedBackgrounds: data.owned_backgrounds ?? [],
       currentOperation: data.current_operation,
       avatarOutfit: data.avatar_outfit,
       avatarUrl: data.avatar_url,
