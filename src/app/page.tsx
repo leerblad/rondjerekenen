@@ -7,14 +7,7 @@ export default function Home() {
 
       {/* Nav */}
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-10">
-        <Image
-          src="/Rekenenlogo.jpg"
-          alt="Rondje Rekenen"
-          width={120}
-          height={48}
-          className="h-12 w-auto object-contain"
-          priority
-        />
+        <span className="text-2xl font-extrabold text-dark">Rondje Rekenen</span>
         <div className="flex items-center gap-2">
           <Link
             href="/leerkracht?tab=login"
@@ -32,28 +25,15 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="mx-auto max-w-5xl px-6 pb-16 pt-10 sm:px-10">
-        <div className="rounded-3xl bg-dark px-8 py-14 sm:px-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
-            Voor groep 4 t/m 8
-          </p>
-          <h1 className="mt-4 text-5xl font-extrabold leading-tight text-white sm:text-6xl">
+      <section className="mx-auto max-w-5xl px-6 pb-8 pt-6 sm:px-10">
+        <div className="rounded-3xl bg-dark px-8 py-8 sm:px-14">
+          <h1 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">
             Rekenen oefenen{" "}
             <span className="text-coral">zonder gedoe.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
-            Elke dag tien minuten sommen maken — plus, min, keer en deel.
-            Leerlingen verdienen munten en passen hun avatar aan.
-            Leerkrachten zien live wie er oefent en welke sommen moeilijk zijn.
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+            Elke dag sommen maken — plus, min, keer en deel. Verdien munten en klim door de levels.
           </p>
-
-          {/* Feature pills */}
-          <div className="mt-8 flex flex-wrap gap-3">
-            <span className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white">⏱ Tijdgestuurd per groep</span>
-            <span className="rounded-full bg-yellow px-4 py-2 text-sm font-semibold text-dark">🪙 Munten verdienen</span>
-            <span className="rounded-full bg-purple px-4 py-2 text-sm font-semibold text-white">📊 Voortgang per leerling</span>
-            <span className="rounded-full bg-green px-4 py-2 text-sm font-semibold text-white">🔓 Operaties ontgrendelen</span>
-          </div>
         </div>
       </section>
 
