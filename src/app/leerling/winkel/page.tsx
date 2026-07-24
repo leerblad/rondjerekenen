@@ -43,19 +43,23 @@ const PATTERNS: ShopItem[] = [
   },
 ];
 
-const IMAGES: ShopItem[] = [1, 2, 3, 4, 5].map((n) => ({
-  key: `image-${n}`,
-  label: `Achtergrond ${n}`,
+const IMAGE_FILES = [
+  { key: "image-strand",     label: "Strand",     file: "strand_achtergrond.jpg" },
+  { key: "image-minecraft",  label: "Minecraft",  file: "minecraft_achtergrond.png" },
+  { key: "image-graffiti",   label: "Graffiti",   file: "graffiti_achtergrond.png" },
+  { key: "image-meisjes",    label: "Meisjes",    file: "meisjes_achtergrond.png" },
+  { key: "image-meisjes2",   label: "Meisjes 2",  file: "meisjes2_achtergrond.png" },
+  { key: "image-vuurwerk",   label: "Vuurwerk",   file: "vuurwerk_achtergrond.jpg" },
+];
+
+const IMAGES: ShopItem[] = IMAGE_FILES.map(({ key, label, file }) => ({
+  key,
+  label,
   category: "image" as const,
   price: 150,
   preview: (
     <div className="relative h-full w-full">
-      <Image
-        src={`/backgrounds/achtergrond-${n}.jpg`}
-        alt={`Achtergrond ${n}`}
-        fill
-        className="rounded-xl object-cover"
-      />
+      <Image src={`/backgrounds/${file}`} alt={label} fill className="rounded-xl object-cover" />
     </div>
   ),
 }));
@@ -78,8 +82,8 @@ export function backgroundStyle(bg: string | null | undefined): React.CSSPropert
   if (bg === "pattern-zigzag") return { background: "linear-gradient(135deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(225deg,#4ade80 25%,transparent 25%) -10px 0,linear-gradient(315deg,#4ade80 25%,transparent 25%),linear-gradient(45deg,#4ade80 25%,transparent 25%),#fff", backgroundSize: "20px 20px" };
   if (bg === "pattern-stars") return { background: "#a78bfa", backgroundImage: "radial-gradient(circle,#fef08a 2px,transparent 2px)", backgroundSize: "14px 14px" };
   if (bg.startsWith("image-")) {
-    const n = bg.split("-")[1];
-    return { backgroundImage: `url(/backgrounds/achtergrond-${n}.jpg)`, backgroundSize: "cover", backgroundPosition: "center" };
+    const found = IMAGE_FILES.find((f) => f.key === bg);
+    if (found) return { backgroundImage: `url(/backgrounds/${found.file})`, backgroundSize: "cover", backgroundPosition: "center" };
   }
   return {};
 }
