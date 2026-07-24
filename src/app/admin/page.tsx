@@ -31,6 +31,8 @@ export default function AdminPage() {
   const [msgSubjects, setMsgSubjects] = useState<Record<string, string>>({});
   const [msgBodies, setMsgBodies] = useState<Record<string, string>>({});
   const [msgStatus, setMsgStatus] = useState<Record<string, string>>({});
+  const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
+  const [coinStatus, setCoinStatus] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/api/admin/accounts")
@@ -87,6 +89,28 @@ export default function AdminPage() {
     if (res.ok) {
       setMsgSubjects((s) => ({ ...s, [teacherId]: "" }));
       setMsgBodies((s) => ({ ...s, [teacherId]: "" }));
+    }
+  }
+
+  async function addCoins(studentId: string) {
+    const amount = parseInt(coinAmounts[studentId] ?? "0", 10);
+    if (!amount || isNaN(amount)) {
+      setCoinStatus((s) => ({ ...s, [studentId]: "Vul een getal in." }));
+      return;
+    }
+    setCoinStatus((s) => ({ ...s, [studentId]: "Bezig..." }));
+    const res = await fetch("/api/admin/add-coins", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, amount }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setStudents((prev) => prev.map((s) => s.id === studentId ? { ...s, coins: data.coins } : s));
+      setCoinAmounts((a) => ({ ...a, [studentId]: "" }));
+      setCoinStatus((s) => ({ ...s, [studentId]: `✓ Nu ${data.coins} munten` }));
+    } else {
+      setCoinStatus((s) => ({ ...s, [studentId]: data.error ?? "Mislukt." }));
     }
   }
 
@@ -171,6 +195,7 @@ export default function AdminPage() {
                           <th className="pb-2 text-left font-semibold text-dark/50">Naam</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Groep</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Munten</th>
+                          <th className="pb-2 text-left font-semibold text-dark/50">Munten aanpassen</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Bewerking</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Aangemeld</th>
                         </tr>
@@ -183,8 +208,56 @@ export default function AdminPage() {
                           >
                             <td className="py-2 font-medium">{s.nickname}</td>
                             <td className="py-2">{s.grade}</td>
-                            <td className="py-2" style={{ color: "#F5C842" }}>
+                            <td className="py-2 font-mono font-bold" style={{ color: "#F5C842" }}>
                               {s.coins}
+                            </td>
+                            <td className="py-2">
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  value={coinAmounts[s.id] ?? ""}
+                                  onChange={(e) => setCoinAmounts((a) => ({ ...a, [s.id]: e.target.value }))}
+                                  placeholder="bv. 10"
+                                  className="w-20 rounded-lg border px-2 py-1 text-sm"
+                                  style={{ borderColor: "rgba(0,0,0,0.12)" }}
+                                />
+                                <button
+                                  onClick={() => addCoins(s.id)}
+                                  className="rounded-lg px-2 py-1 text-xs font-semibold text-white transition hover:opacity-90"
+                                  style={{ background: "#F5C842", color: "#1A1A1A" }}
+                                >
+                                  +
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    const amount = -Math.abs(parseInt(coinAmounts[s.id] ?? "0", 10));
+                                    if (!amount) return;
+                                    setCoinStatus((st) => ({ ...st, [s.id]: "Bezig..." }));
+                                    const res = await fetch("/api/admin/add-coins", {
+                                      method: "PATCH",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({ studentId: s.id, amount }),
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok) {
+                                      setStudents((prev) => prev.map((st) => st.id === s.id ? { ...st, coins: data.coins } : st));
+                                      setCoinAmounts((a) => ({ ...a, [s.id]: "" }));
+                                      setCoinStatus((st) => ({ ...st, [s.id]: `✓ Nu ${data.coins} munten` }));
+                                    } else {
+                                      setCoinStatus((st) => ({ ...st, [s.id]: data.error ?? "Mislukt." }));
+                                    }
+                                  }}
+                                  className="rounded-lg px-2 py-1 text-xs font-semibold transition hover:opacity-90"
+                                  style={{ background: "rgba(0,0,0,0.08)", color: "#1A1A1A" }}
+                                >
+                                  −
+                                </button>
+                              </div>
+                              {coinStatus[s.id] && (
+                                <p className="mt-0.5 text-xs" style={{ color: coinStatus[s.id]?.startsWith("✓") ? "#3AB54A" : "#E8705A" }}>
+                                  {coinStatus[s.id]}
+                                </p>
+                              )}
                             </td>
                             <td className="py-2">{s.current_operation ?? "—"}</td>
                             <td className="py-2 text-dark/50">
