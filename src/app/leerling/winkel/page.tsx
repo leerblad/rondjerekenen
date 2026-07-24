@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth, type StudentUser } from "@/lib/AuthContext";
 import { Illustration } from "@/components/Illustration";
 
 type ShopItem = {
@@ -91,7 +91,7 @@ export function backgroundStyle(bg: string | null | undefined): React.CSSPropert
 export default function Winkel() {
   const router = useRouter();
   const { user, updateStudent } = useAuth();
-  const student = user?.role === "student" ? user : null;
+  const student = user?.role === "student" ? (user as StudentUser) : null;
 
   const [buying, setBuying] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -113,10 +113,10 @@ export default function Winkel() {
     const data = await res.json();
     setBuying(null);
     if (!res.ok) { setError(data.error || "Mislukt."); return; }
-    updateStudent({ coins: data.coins, background: item.key } as never);
+    updateStudent({ coins: data.coins, background: data.background });
   }
 
-  const currentBg = (student as typeof student & { background?: string }).background;
+  const currentBg = student.background;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
