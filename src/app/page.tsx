@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Illustration } from "@/components/Illustration";
 
 export default function Home() {
   return (
@@ -61,19 +60,20 @@ export default function Home() {
       {/* Rolkaarten */}
       <section className="mx-auto max-w-5xl px-6 pb-20 sm:px-10">
         <h2 className="mb-6 text-center text-2xl font-bold text-dark">
-          Voor wie ben jij?
+          Wie gebruikt Rondje Rekenen?
         </h2>
         <div className="grid gap-5 sm:grid-cols-2">
 
           {/* Leerkracht */}
           <div className="flex flex-col gap-5 rounded-3xl bg-coral p-8 text-white shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
-              <Illustration name="teacher" size={48} />
+            <div className="flex gap-3">
+              <Image src="/avatars/leerkracht-vrouw-pen.png" alt="Leerkracht" width={72} height={72} className="h-18 w-18 rounded-2xl object-contain bg-white/20 p-1" />
+              <Image src="/avatars/leerkracht-man-boek.webp" alt="Leerkracht" width={72} height={72} className="h-18 w-18 rounded-2xl object-contain bg-white/20 p-1" />
             </div>
             <div>
               <h3 className="text-2xl font-extrabold">Ik ben leerkracht</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/80">
-                Maak een klas aan, deel je klascode en volg de voortgang van al je leerlingen. Zie welke sommen moeilijk zijn en pas het groepsniveau per leerling aan.
+                Maak een klas aan, deel je klascode en volg de voortgang van al je leerlingen. Zie welke sommen moeilijk zijn en volg wie er dagelijks oefent.
               </p>
             </div>
             <div className="mt-auto flex flex-col gap-2 sm:flex-row">
@@ -94,13 +94,14 @@ export default function Home() {
 
           {/* Leerling */}
           <div className="flex flex-col gap-5 rounded-3xl bg-purple p-8 text-white shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
-              <Illustration name="student" size={48} />
+            <div className="flex gap-3">
+              <Image src="/avatars/leerling-jongen-1.png" alt="Leerling" width={72} height={72} className="h-18 w-18 rounded-2xl object-contain bg-white/20 p-1" />
+              <Image src="/avatars/leerling-meisje-1.png" alt="Leerling" width={72} height={72} className="h-18 w-18 rounded-2xl object-contain bg-white/20 p-1" />
             </div>
             <div>
               <h3 className="text-2xl font-extrabold">Ik ben leerling</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/80">
-                Doe mee met de klascode van je leerkracht. Oefen elke dag je rondje, verdien munten en pas je avatar aan in de winkel.
+                Doe mee met de klascode van je leerkracht. Oefen elke dag je rondje, verdien munten en klim door de levels.
               </p>
             </div>
             <div className="mt-auto flex flex-col gap-2 sm:flex-row">
