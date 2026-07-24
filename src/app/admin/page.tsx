@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [msgStatus, setMsgStatus] = useState<Record<string, string>>({});
   const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
   const [coinStatus, setCoinStatus] = useState<Record<string, string>>({});
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/accounts")
@@ -114,6 +115,33 @@ export default function AdminPage() {
     }
   }
 
+  async function deleteAccount(type: "teacher" | "student", id: string, label: string) {
+    const warning = type === "teacher"
+      ? `Weet je zeker dat je leerkracht "${label}" wilt verwijderen?\n\nLET OP: alle leerlingen van deze klas worden ook verwijderd!`
+      : `Weet je zeker dat je leerling "${label}" wilt verwijderen?`;
+    if (!window.confirm(warning)) return;
+    setDeleting(id);
+    const res = await fetch("/api/admin/delete-account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, id }),
+    });
+    setDeleting(null);
+    if (res.ok) {
+      if (type === "teacher") {
+        setTeachers((t) => t.filter((t) => t.id !== id));
+        setStudents((s) => s.filter((s) => {
+          const teacher = teachers.find((t) => t.id === id);
+          return teacher ? s.class_code !== teacher.class_code : true;
+        }));
+      } else {
+        setStudents((s) => s.filter((s) => s.id !== id));
+      }
+    } else {
+      alert("Verwijderen mislukt.");
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" });
     router.push("/admin/login");
@@ -176,8 +204,18 @@ export default function AdminPage() {
                     {teacher.class_code}
                   </span>
                   <span className="text-sm text-white/80">{teacher.email ?? "—"}</span>
-                  <span className="ml-auto text-sm text-white/70">
-                    {teacherStudents.length} leerling{teacherStudents.length !== 1 ? "en" : ""}
+                  <span className="ml-auto flex items-center gap-3">
+                    <span className="text-sm text-white/70">
+                      {teacherStudents.length} leerling{teacherStudents.length !== 1 ? "en" : ""}
+                    </span>
+                    <button
+                      onClick={() => deleteAccount("teacher", teacher.id, teacher.name)}
+                      disabled={deleting === teacher.id}
+                      className="rounded-lg px-3 py-1 text-xs font-semibold text-white transition hover:opacity-80"
+                      style={{ background: "rgba(0,0,0,0.25)" }}
+                    >
+                      {deleting === teacher.id ? "…" : "Verwijderen"}
+                    </button>
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-white/60">
@@ -198,6 +236,7 @@ export default function AdminPage() {
                           <th className="pb-2 text-left font-semibold text-dark/50">Munten aanpassen</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Bewerking</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Aangemeld</th>
+                          <th className="pb-2"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -262,6 +301,16 @@ export default function AdminPage() {
                             <td className="py-2">{s.current_operation ?? "—"}</td>
                             <td className="py-2 text-dark/50">
                               {new Date(s.created_at).toLocaleDateString("nl-NL")}
+                            </td>
+                            <td className="py-2">
+                              <button
+                                onClick={() => deleteAccount("student", s.id, s.nickname)}
+                                disabled={deleting === s.id}
+                                className="rounded-lg px-2 py-1 text-xs font-semibold transition hover:opacity-80"
+                                style={{ background: "rgba(232,112,90,0.12)", color: "#E8705A" }}
+                              >
+                                {deleting === s.id ? "…" : "Verwijder"}
+                              </button>
                             </td>
                           </tr>
                         ))}
