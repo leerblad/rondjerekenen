@@ -25,23 +25,67 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="mx-auto max-w-5xl px-6 pb-8 pt-6 sm:px-10">
-        <div className="rounded-3xl bg-dark px-8 py-8 sm:px-14">
-          <h1 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-            Rekenen oefenen{" "}
-            <span className="text-coral">zonder gedoe.</span>
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-            Elke dag sommen maken — plus, min, keer en deel. Verdien munten en klim door de levels.
-          </p>
+      <section className="mx-auto max-w-5xl px-6 pb-8 pt-4 sm:px-10">
+        <div className="relative overflow-hidden rounded-3xl bg-dark px-8 py-10 sm:px-14 sm:py-14">
+
+          {/* Avatars */}
+          <div className="pointer-events-none absolute bottom-0 right-0 flex items-end gap-0">
+            <Image
+              src="/avatars/leerkracht-vrouw-pen.png"
+              alt="Leerkracht"
+              width={140}
+              height={140}
+              className="translate-y-1 object-contain drop-shadow-lg"
+              style={{ transform: "scaleX(-1) translateY(4px)" }}
+            />
+            <Image
+              src="/avatars/leerling-jongen-1.png"
+              alt="Leerling"
+              width={115}
+              height={115}
+              className="object-contain drop-shadow-lg"
+              style={{ translateY: "4px" }}
+            />
+          </div>
+
+          {/* Text */}
+          <div className="relative max-w-sm sm:max-w-md">
+            <p className="text-xs font-bold uppercase tracking-widest text-coral">
+              Groep 4 t/m 8 · Gratis · Geen gedoe
+            </p>
+            <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+              Elke dag een rondje rekenen.{" "}
+              <span className="text-coral">Klaar in 10 minuten.</span>
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-white/70">
+              Leerlingen oefenen dagelijks met plus, min, keer en delen — op hun eigen niveau. Ze verdienen munten, bouwen een reeks op en klimmen door 140 levels.
+            </p>
+            <ul className="mt-4 space-y-1.5 text-sm text-white/60">
+              <li>✓ Gratis account aanmaken, direct starten</li>
+              <li>✓ Leerkracht maakt een klas en deelt de code</li>
+              <li>✓ Leerlingen zien hun eigen voortgang</li>
+              <li>✓ Geen app nodig — werkt gewoon in de browser</li>
+            </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/leerkracht?tab=register"
+                className="rounded-full bg-coral px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
+              >
+                Start als leerkracht →
+              </Link>
+              <Link
+                href="/leerling?tab=login"
+                className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Ik ben leerling
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Rolkaarten */}
       <section className="mx-auto max-w-5xl px-6 pb-20 sm:px-10">
-        <h2 className="mb-6 text-center text-2xl font-bold text-dark">
-          Wie gebruikt Rondje Rekenen?
-        </h2>
         <div className="grid gap-5 sm:grid-cols-2">
 
           {/* Leerkracht */}
@@ -53,7 +97,7 @@ export default function Home() {
             <div>
               <h3 className="text-2xl font-extrabold">Ik ben leerkracht</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/80">
-                Maak een klas aan, deel je klascode en volg de voortgang van al je leerlingen. Zie welke sommen moeilijk zijn en volg wie er dagelijks oefent.
+                Maak een klas aan, deel je klascode en volg de voortgang van al je leerlingen. Zie welke sommen moeilijk zijn en wie er dagelijks oefent.
               </p>
             </div>
             <div className="mt-auto flex flex-col gap-2 sm:flex-row">
