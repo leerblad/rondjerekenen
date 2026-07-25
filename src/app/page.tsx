@@ -27,7 +27,7 @@ export default function Home() {
               Gratis · Geen app · Direct starten
             </p>
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-5xl">
-              Elke dag een rondje rekenen.{" "}
+              Elke dag een rondje rekenen.<br />
               <span className="text-coral">Klaar in 10 minuten.</span>
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/60">
