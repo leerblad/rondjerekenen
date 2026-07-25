@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import { OPERATION_LABELS, Operation } from "@/lib/math";
+import { OPERATION_LABELS, Operation, STAGES, STAGE_LABELS, LEVELS_PER_STAGE, levelToStage, withinStageLevel } from "@/lib/math";
 import { Illustration } from "@/components/Illustration";
 
 type Message = {
@@ -21,6 +21,7 @@ type Row = {
   nickname: string;
   grade: number;
   coins: number;
+  level: number;
   currentOperation: string;
   doneToday: boolean;
   streak: number;
@@ -158,6 +159,16 @@ export default function Portal() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentId: id, grade }),
+    });
+  }
+
+  async function changeLevel(id: string, level: number) {
+    setRows((r) => r.map((x) => (x.id === id ? { ...x, level } : x)));
+    setSelected((s) => s && s.id === id ? { ...s, level } : s);
+    await fetch("/api/leerkracht/student", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: id, level }),
     });
   }
 
@@ -398,6 +409,48 @@ export default function Portal() {
               Groep {selected.grade} · {selected.coins} munten · reeks{" "}
               {selected.streak}
             </p>
+
+            {/* Level aanpassen */}
+            <div className="mt-4 rounded-2xl bg-cream p-4">
+              <p className="mb-2 text-sm font-semibold">Level aanpassen</p>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="w-24 text-xs text-dark/60">Onderdeel</label>
+                  <select
+                    value={levelToStage(selected.level ?? 1)}
+                    onChange={(e) => {
+                      const stageIdx = STAGES.indexOf(e.target.value as typeof STAGES[number]);
+                      const newLevel = stageIdx * LEVELS_PER_STAGE + 1;
+                      changeLevel(selected.id, newLevel);
+                    }}
+                    className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
+                  >
+                    {STAGES.map((s) => (
+                      <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-24 text-xs text-dark/60">Level (1–20)</label>
+                  <select
+                    value={withinStageLevel(selected.level ?? 1)}
+                    onChange={(e) => {
+                      const stageIdx = STAGES.indexOf(levelToStage(selected.level ?? 1));
+                      const newLevel = stageIdx * LEVELS_PER_STAGE + Number(e.target.value);
+                      changeLevel(selected.id, newLevel);
+                    }}
+                    className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
+                  >
+                    {Array.from({ length: LEVELS_PER_STAGE }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>Level {n}</option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-xs text-dark/40">
+                  Huidig: level {selected.level ?? 1} — {STAGE_LABELS[levelToStage(selected.level ?? 1)]}, level {withinStageLevel(selected.level ?? 1)} van 20
+                </p>
+              </div>
+            </div>
 
             {!progress && <p className="mt-6 text-dark/40">Laden...</p>}
             {progress && (

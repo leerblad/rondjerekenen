@@ -11,7 +11,7 @@ export async function GET(
 
   const { data: students } = await supabaseAdmin
     .from("students")
-    .select("id, nickname, grade, coins, current_operation")
+    .select("id, nickname, grade, coins, level, current_operation")
     .eq("class_code", code)
     .order("nickname");
 
@@ -51,6 +51,7 @@ export async function GET(
         nickname: s.nickname,
         grade: s.grade,
         coins: s.coins,
+        level: s.level ?? 1,
         currentOperation: s.current_operation,
         doneToday,
         streak,
