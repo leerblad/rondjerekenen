@@ -135,11 +135,13 @@ export default function StudentPortal() {
       </div>
 
       {/* Welkom */}
-      <div className="flex flex-col items-center gap-4 rounded-3xl bg-white p-8 text-center shadow-sm">
+      <div
+        className="flex flex-col items-center gap-4 rounded-3xl p-8 text-center shadow-sm"
+        style={bg ? backgroundStyle(bg) : { background: "white" }}
+      >
         <button
           onClick={() => setPickingAvatar(true)}
-          className="group relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl transition hover:opacity-80"
-          style={bg ? backgroundStyle(bg) : { background: "#fde8e4" }}
+          className="group relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl bg-white/30 transition hover:opacity-80"
           title="Verander je figuur"
         >
           {student.avatarUrl ? (
