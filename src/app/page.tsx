@@ -58,7 +58,7 @@ export default function Home() {
           {[
             { title: "10 minuten per dag", text: "Kort genoeg om vol te houden, lang genoeg om echt te oefenen." },
             { title: "Munten & levels", text: "Leerlingen worden gemotiveerd door beloningen en zichtbare voortgang." },
-            { title: "Inzicht voor de leerkracht", text: "Zie wie er oefent, welke sommen moeilijk zijn en wie een steuntje nodig heeft." },
+            { title: "Inzicht voor de leerkracht", text: "Zie wie er oefent, welke sommen moeilijk zijn en en wie extra hulp nodig heeft." },
           ].map(({ title, text }) => (
             <div key={title} className="rounded-2xl bg-white p-6 shadow-sm">
               <p className="font-bold">{title}</p>
