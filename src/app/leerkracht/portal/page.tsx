@@ -225,14 +225,30 @@ export default function Portal() {
     <main className="mx-auto max-w-5xl px-6 py-10">
       {unread.length > 0 && (
         <div
-          className="mb-6 rounded-2xl px-5 py-4 cursor-pointer"
+          className="mb-6 flex items-center justify-between rounded-2xl px-5 py-4"
           style={{ background: "#F5C842" }}
-          onClick={() => setOpenMsg(messages[0])}
         >
-          <p className="font-semibold text-dark">
-            📬 Je hebt {unread.length} nieuw{unread.length !== 1 ? "e" : ""} bericht{unread.length !== 1 ? "en" : ""} van de beheerder
-          </p>
-          <p className="text-sm text-dark/70 mt-0.5">Klik om te lezen</p>
+          <div className="cursor-pointer" onClick={() => setOpenMsg(unread[0])}>
+            <p className="font-semibold text-dark">
+              📬 Je hebt {unread.length} nieuw{unread.length !== 1 ? "e" : ""} bericht{unread.length !== 1 ? "en" : ""} van de beheerder
+            </p>
+            <p className="text-sm text-dark/70 mt-0.5">Klik om te lezen</p>
+          </div>
+          <button
+            onClick={async () => {
+              for (const msg of unread) {
+                await fetch("/api/leerkracht/messages", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ messageId: msg.id }),
+                });
+              }
+              setMessages((ms) => ms.map((m) => ({ ...m, read: true })));
+            }}
+            className="ml-4 flex-shrink-0 rounded-full bg-black/10 px-3 py-1 text-sm font-semibold text-dark hover:bg-black/20"
+          >
+            ✕ Sluiten
+          </button>
         </div>
       )}
       <div className="mb-8 flex items-center justify-between">
@@ -362,7 +378,7 @@ export default function Portal() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold">{openMsg.subject}</h3>
-              <button onClick={() => setOpenMsg(null)} className="text-dark/40">✕</button>
+              <button onClick={() => { setOpenMsg(null); }} className="text-dark/40">✕</button>
             </div>
             <p className="text-sm text-dark/50 mb-4">
               {new Date(openMsg.sent_at).toLocaleString("nl-NL")}
