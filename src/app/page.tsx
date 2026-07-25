@@ -9,16 +9,10 @@ export default function Home() {
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-10">
         <span className="text-2xl font-extrabold text-dark">Rondje Rekenen</span>
         <div className="flex items-center gap-2">
-          <Link
-            href="/leerkracht?tab=login"
-            className="rounded-full bg-coral px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-          >
+          <Link href="/leerkracht?tab=login" className="rounded-full bg-coral px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
             Leerkracht
           </Link>
-          <Link
-            href="/leerling?tab=login"
-            className="rounded-full bg-purple px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-          >
+          <Link href="/leerling?tab=login" className="rounded-full bg-purple px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90">
             Leerling
           </Link>
         </div>
@@ -26,61 +20,76 @@ export default function Home() {
 
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-6 pb-8 pt-4 sm:px-10">
-        <div className="relative overflow-hidden rounded-3xl bg-dark px-8 py-10 sm:px-14 sm:py-14">
+        <div className="rounded-3xl bg-dark overflow-hidden">
 
-          {/* Avatars */}
-          <div className="pointer-events-none absolute bottom-0 right-0 flex items-end gap-0">
-            <Image
-              src="/avatars/leerkracht-vrouw-pen.png"
-              alt="Leerkracht"
-              width={140}
-              height={140}
-              className="translate-y-1 object-contain drop-shadow-lg"
-              style={{ transform: "scaleX(-1) translateY(4px)" }}
-            />
+          {/* Top: avatars + tagline */}
+          <div className="flex flex-col items-center gap-2 px-8 pt-10 text-center sm:px-14">
+            <p className="rounded-full bg-coral/20 px-4 py-1 text-xs font-bold uppercase tracking-widest text-coral">
+              Gratis · Geen app · Direct starten
+            </p>
+            <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-5xl">
+              Rekenen dat kinderen{" "}
+              <span className="text-coral">wíllen</span> doen.
+            </h1>
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/60">
+              Tien minuten per dag, op eigen niveau. Leerlingen verdienen munten, bouwen een reeks op en klimmen door 140 levels — plus, min, keer en delen.
+            </p>
+          </div>
+
+          {/* Avatars facing each other */}
+          <div className="relative mt-6 flex items-end justify-center gap-0">
+            {/* Leerkracht — gespiegeld zodat ze naar rechts kijkt */}
+            <div className="relative" style={{ transform: "scaleX(-1)" }}>
+              <Image
+                src="/avatars/leerkracht-vrouw-pen.png"
+                alt="Leerkracht"
+                width={160}
+                height={160}
+                className="object-contain drop-shadow-xl"
+              />
+            </div>
+
+            {/* Midden tekst */}
+            <div className="relative z-10 -mx-4 mb-8 flex flex-col items-center gap-3">
+              <div className="rounded-2xl bg-white/10 px-5 py-3 text-center backdrop-blur-sm">
+                <p className="text-xs font-semibold text-white/60">Al in gebruik bij</p>
+                <p className="text-lg font-extrabold text-white">groep 4 t/m 8</p>
+              </div>
+              <Link
+                href="/leerkracht?tab=register"
+                className="rounded-full bg-coral px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
+              >
+                Begin nu gratis →
+              </Link>
+            </div>
+
+            {/* Leerling */}
             <Image
               src="/avatars/leerling-jongen-1.png"
               alt="Leerling"
-              width={115}
-              height={115}
-              className="object-contain drop-shadow-lg"
-              style={{ translateY: "4px" }}
+              width={130}
+              height={130}
+              className="object-contain drop-shadow-xl"
             />
           </div>
 
-          {/* Text */}
-          <div className="relative max-w-sm sm:max-w-md">
-            <p className="text-xs font-bold uppercase tracking-widest text-coral">
-              Groep 4 t/m 8 · Gratis · Geen gedoe
-            </p>
-            <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-              Elke dag een rondje rekenen.{" "}
-              <span className="text-coral">Klaar in 10 minuten.</span>
-            </h1>
-            <p className="mt-4 text-sm leading-relaxed text-white/70">
-              Leerlingen oefenen dagelijks met plus, min, keer en delen — op hun eigen niveau. Ze verdienen munten, bouwen een reeks op en klimmen door 140 levels.
-            </p>
-            <ul className="mt-4 space-y-1.5 text-sm text-white/60">
-              <li>✓ Gratis account aanmaken, direct starten</li>
-              <li>✓ Leerkracht maakt een klas en deelt de code</li>
-              <li>✓ Leerlingen zien hun eigen voortgang</li>
-              <li>✓ Geen app nodig — werkt gewoon in de browser</li>
-            </ul>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/leerkracht?tab=register"
-                className="rounded-full bg-coral px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
-              >
-                Start als leerkracht →
-              </Link>
-              <Link
-                href="/leerling?tab=login"
-                className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Ik ben leerling
-              </Link>
+        </div>
+      </section>
+
+      {/* Voordelen */}
+      <section className="mx-auto max-w-5xl px-6 pb-8 sm:px-10">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { icon: "⏱", title: "10 minuten per dag", text: "Kort genoeg om vol te houden, lang genoeg om echt te oefenen." },
+            { icon: "🪙", title: "Munten & levels", text: "Leerlingen worden gemotiveerd door beloningen en zichtbare voortgang." },
+            { icon: "📊", title: "Inzicht voor de leerkracht", text: "Zie wie er oefent, welke sommen moeilijk zijn en wie een steuntje nodig heeft." },
+          ].map(({ icon, title, text }) => (
+            <div key={title} className="rounded-2xl bg-white p-6 shadow-sm">
+              <p className="text-2xl">{icon}</p>
+              <p className="mt-2 font-bold">{title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-dark/50">{text}</p>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -101,16 +110,10 @@ export default function Home() {
               </p>
             </div>
             <div className="mt-auto flex flex-col gap-2 sm:flex-row">
-              <Link
-                href="/leerkracht?tab=login"
-                className="flex-1 rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-coral transition hover:bg-white/90"
-              >
+              <Link href="/leerkracht?tab=login" className="flex-1 rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-coral transition hover:bg-white/90">
                 Inloggen
               </Link>
-              <Link
-                href="/leerkracht?tab=register"
-                className="flex-1 rounded-full border-2 border-white px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
-              >
+              <Link href="/leerkracht?tab=register" className="flex-1 rounded-full border-2 border-white px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10">
                 Registreren
               </Link>
             </div>
@@ -129,16 +132,10 @@ export default function Home() {
               </p>
             </div>
             <div className="mt-auto flex flex-col gap-2 sm:flex-row">
-              <Link
-                href="/leerling?tab=login"
-                className="flex-1 rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-purple transition hover:bg-white/90"
-              >
+              <Link href="/leerling?tab=login" className="flex-1 rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-purple transition hover:bg-white/90">
                 Inloggen
               </Link>
-              <Link
-                href="/leerling?tab=register"
-                className="flex-1 rounded-full border-2 border-white px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
-              >
+              <Link href="/leerling?tab=register" className="flex-1 rounded-full border-2 border-white px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10">
                 Registreren
               </Link>
             </div>
