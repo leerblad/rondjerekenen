@@ -93,7 +93,7 @@ function StudentAuth() {
             value={classCode}
             onChange={(e) => setClassCode(e.target.value.toUpperCase())}
             className="rounded-xl border border-black/10 bg-white px-4 py-3 font-mono uppercase tracking-widest"
-            placeholder="3XJK5"
+            placeholder="bijv: 3XJK5"
             maxLength={5}
             required
           />
@@ -104,7 +104,7 @@ function StudentAuth() {
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             className="rounded-xl border border-black/10 bg-white px-4 py-3"
-            placeholder="Lars1"
+            placeholder="bijv: Lars1 of Mila99"
             required
           />
         </label>

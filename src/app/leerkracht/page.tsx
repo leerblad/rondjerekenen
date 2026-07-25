@@ -94,7 +94,7 @@ function TeacherAuth() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="rounded-xl border border-black/10 bg-white px-4 py-3"
-            placeholder="Juf Megan"
+            placeholder="bijv: Inge van Dijk of Jelle Timmermans"
             required
           />
         </label>
