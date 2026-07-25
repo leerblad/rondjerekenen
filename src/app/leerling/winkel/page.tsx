@@ -176,12 +176,12 @@ export default function Winkel() {
         <div className="mt-4 rounded-3xl bg-white p-6 text-center shadow-sm">
           <p className="mb-3 font-bold">Jouw avatar</p>
           <div
-            className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-full"
+            className="mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl"
             style={backgroundStyle(currentBg)}
           >
             {student.avatarUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={student.avatarUrl} alt="avatar" className="h-4/5 w-4/5 object-contain" />
+              <img src={student.avatarUrl} alt="avatar" className="h-full w-full object-contain" />
             )}
           </div>
         </div>
