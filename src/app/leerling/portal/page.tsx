@@ -153,6 +153,7 @@ export default function StudentPortal() {
             Wijzig
           </span>
         </button>
+        <div className="rounded-2xl bg-white/70 px-6 py-4 text-center backdrop-blur-sm">
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
 
         {/* Streak */}
@@ -181,6 +182,7 @@ export default function StudentPortal() {
         <Link href="/leerling/winkel" className="text-sm text-purple hover:underline">
           🛒 Naar de winkel
         </Link>
+        </div>
       </div>
 
       {/* Level info */}
