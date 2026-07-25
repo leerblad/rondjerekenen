@@ -52,7 +52,8 @@ function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: num
   const stage = levelToStage(level);
   const resultMap = new Map<string, boolean>();
   for (const a of answers) {
-    resultMap.set(`${a.qA}-${a.qB}`, a.isCorrect);
+    const key = `${a.qA}-${a.qB}`;
+    if (!resultMap.has(key)) resultMap.set(key, a.isCorrect);
   }
 
   const isMin = stage === "min" || stage === "plus_min";

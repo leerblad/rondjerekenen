@@ -11,7 +11,7 @@ type IncomingAnswer = {
   responseTimeMs: number;
 };
 
-const DAILY_COINS = 10;
+const LEVEL_COINS = 10;
 const BONUS_COINS = 20;
 
 export async function POST(req: Request) {
@@ -71,31 +71,22 @@ export async function POST(req: Request) {
     .eq("id", studentId)
     .single();
 
-  // Award coins once per day (first non-bonus session)
-  const { count } = await supabaseAdmin
-    .from("sessions")
-    .select("id", { count: "exact", head: true })
-    .eq("student_id", studentId)
-    .eq("date", today)
-    .eq("bonus", false)
-    .eq("completed", true);
+  // Award coins when level is passed (>= 80%); bonus session doubles the reward
+  const pct = total > 0 ? correct / total : 0;
+  const passed = pct >= UNLOCK_THRESHOLD;
 
   let coinsAwarded = 0;
   let newCoins = student?.coins ?? 0;
-  if (bonus) {
-    coinsAwarded = BONUS_COINS;
-    newCoins += BONUS_COINS;
-  } else if ((count ?? 0) <= 1) {
-    coinsAwarded = DAILY_COINS;
-    newCoins += DAILY_COINS;
+  if (passed) {
+    coinsAwarded = bonus ? BONUS_COINS : LEVEL_COINS;
+    newCoins += coinsAwarded;
   }
 
   // Advance level immediately if >= 80% correct
   let newLevel = student?.level ?? level;
   let unlockedStageLabel: string | null = null;
 
-  const pct = total > 0 ? correct / total : 0;
-  if (!bonus && newLevel === level && newLevel < MAX_LEVEL && pct >= UNLOCK_THRESHOLD) {
+  if (!bonus && newLevel === level && newLevel < MAX_LEVEL && passed) {
     newLevel = level + 1;
     const newStage = levelToStage(newLevel);
     const oldStage = levelToStage(level);
