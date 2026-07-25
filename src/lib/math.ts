@@ -65,13 +65,15 @@ export function getTimeLimit(level: number): number {
   return Math.round(6000 - (wl - 1) * (3000 / 19));
 }
 
-/** Max operand for a given within-level — scales from 5 to 10 */
-export function maxForWL(wl: number): number {
-  if (wl <= 4) return 5;
-  if (wl <= 8) return 7;
-  if (wl <= 12) return 8;
-  if (wl <= 16) return 9;
-  return 10;
+/**
+ * Biased random integer 0–max.
+ * wl=1: strongly biased toward small numbers (2+2 much more likely than 9+7)
+ * wl=20: uniform (all combinations equally likely)
+ */
+function biasedRnd(max: number, wl: number): number {
+  // power goes from 3.0 (wl=1) to 1.0 (wl=20) — higher power = smaller numbers more likely
+  const power = 3 - (wl - 1) * (2 / 19);
+  return Math.min(max, Math.floor(Math.pow(Math.random(), power) * (max + 1)));
 }
 
 // ─── Question type ────────────────────────────────────────────────────────────
@@ -91,31 +93,28 @@ function rnd(min: number, max: number): number {
 }
 
 function makePlus(wl: number): Question {
-  const max = maxForWL(wl);
-  const a = rnd(0, max);
-  const b = rnd(0, max);
+  const a = biasedRnd(10, wl);
+  const b = biasedRnd(10, wl);
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeMin(wl: number): Question {
-  const max = maxForWL(wl);
-  let a = rnd(0, max);
-  let b = rnd(0, max);
+  let a = biasedRnd(10, wl);
+  let b = biasedRnd(10, wl);
   if (b > a) [a, b] = [b, a];
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
 function makeKeer(wl: number): Question {
-  const max = maxForWL(wl);
-  const a = rnd(0, max);
-  const b = rnd(0, max);
+  const a = biasedRnd(10, wl);
+  const b = biasedRnd(10, wl);
   return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
 }
 
 function makeDeel(wl: number): Question {
-  const max = maxForWL(wl);
-  const a = rnd(1, max); // quotient
-  const b = rnd(1, max); // divisor
+  // quotient and divisor both biased; divisor ≥ 1 to avoid division by zero
+  const a = Math.max(1, biasedRnd(10, wl));
+  const b = Math.max(1, biasedRnd(10, wl));
   return { question: `${a * b} ÷ ${b} = ?`, answer: a, operation: "deel", a, b };
 }
 

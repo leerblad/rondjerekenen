@@ -15,7 +15,6 @@ import {
   SESSION_SECONDS,
   BONUS_TIME_LIMIT,
   MAX_LEVEL,
-  maxForWL,
   Question,
   Operation,
 } from "@/lib/math";
@@ -48,12 +47,9 @@ type LevelResult = {
 // ─── Mastery grid ─────────────────────────────────────────────────────────────
 
 function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: number }) {
-  const wl = withinStageLevel(level);
-  const maxN = maxForWL(wl);
-  const range = Array.from({ length: maxN + 1 }, (_, i) => i);
+  const range = Array.from({ length: 11 }, (_, i) => i);
 
   const stage = levelToStage(level);
-  // Map "a-b" → true/false (latest result)
   const resultMap = new Map<string, boolean>();
   for (const a of answers) {
     resultMap.set(`${a.qA}-${a.qB}`, a.isCorrect);
