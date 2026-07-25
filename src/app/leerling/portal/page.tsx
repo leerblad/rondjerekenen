@@ -30,6 +30,7 @@ export default function StudentPortal() {
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [playedToday, setPlayedToday] = useState(false);
   const [buyingBonus, setBuyingBonus] = useState(false);
+  const [restoringStreak, setRestoringStreak] = useState(false);
 
   useEffect(() => {
     if (ready && !student) router.replace("/leerling");
@@ -62,6 +63,20 @@ export default function StudentPortal() {
     updateStudent({ avatarUrl: url });
     setPickingAvatar(false);
     setSavingAvatar(false);
+  }
+
+  async function restoreStreak() {
+    if (!student) return;
+    setRestoringStreak(true);
+    const res = await fetch("/api/leerling/herstel-reeks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    });
+    const data = await res.json();
+    setRestoringStreak(false);
+    if (!res.ok) { alert(data.error || "Mislukt."); return; }
+    updateStudent({ coins: data.coins, streak: data.streak, streakLost: 0 });
   }
 
   async function buyBonus() {
@@ -137,6 +152,26 @@ export default function StudentPortal() {
           </span>
         </button>
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
+
+        {/* Streak */}
+        {student.streak > 0 && (
+          <p className="flex items-center gap-2 rounded-full bg-coral/15 px-5 py-2 font-mono text-lg font-bold text-coral">
+            🔥 {student.streak} {student.streak === 1 ? "dag" : "dagen"} op rij
+          </p>
+        )}
+        {student.streakLost > 0 && student.streak <= 1 && (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-dark/50">Je reeks van {student.streakLost} dagen is verbroken.</p>
+            <button
+              onClick={restoreStreak}
+              disabled={restoringStreak || student.coins < 20}
+              className="flex items-center gap-2 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+            >
+              {restoringStreak ? "Bezig..." : <>🔁 Herstel reeks <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">20 munten</span></>}
+            </button>
+          </div>
+        )}
+
         <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-5 py-2 font-mono text-xl font-bold text-dark">
           <Illustration name="coin" size={22} />
           {student.coins} munten

@@ -17,6 +17,8 @@ interface Student {
   class_code: string;
   grade: number;
   coins: number;
+  streak: number;
+  streak_lost: number;
   current_operation: string;
   created_at: string;
 }
@@ -34,6 +36,7 @@ export default function AdminPage() {
   const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
   const [coinStatus, setCoinStatus] = useState<Record<string, string>>({});
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [restoringStreak, setRestoringStreak] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/accounts")
@@ -142,6 +145,22 @@ export default function AdminPage() {
     }
   }
 
+  async function restoreStreak(studentId: string) {
+    setRestoringStreak(studentId);
+    const res = await fetch("/api/admin/herstel-reeks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId }),
+    });
+    const data = await res.json();
+    setRestoringStreak(null);
+    if (res.ok) {
+      setStudents((prev) => prev.map((s) => s.id === studentId ? { ...s, streak: data.streak, streak_lost: 0 } : s));
+    } else {
+      alert(data.error ?? "Mislukt.");
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" });
     router.push("/admin/login");
@@ -234,6 +253,7 @@ export default function AdminPage() {
                           <th className="pb-2 text-left font-semibold text-dark/50">Groep</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Munten</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Munten aanpassen</th>
+                          <th className="pb-2 text-left font-semibold text-dark/50">Reeks</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Bewerking</th>
                           <th className="pb-2 text-left font-semibold text-dark/50">Aangemeld</th>
                           <th className="pb-2"></th>
@@ -297,6 +317,23 @@ export default function AdminPage() {
                                   {coinStatus[s.id]}
                                 </p>
                               )}
+                            </td>
+                            <td className="py-2">
+                              <div className="flex flex-col gap-1">
+                                <span className="font-mono font-semibold" style={{ color: s.streak > 0 ? "#E8705A" : "rgba(26,26,26,0.3)" }}>
+                                  {s.streak > 0 ? `🔥 ${s.streak}` : "—"}
+                                </span>
+                                {s.streak_lost > 0 && (
+                                  <button
+                                    onClick={() => restoreStreak(s.id)}
+                                    disabled={restoringStreak === s.id}
+                                    className="rounded-lg px-2 py-0.5 text-xs font-semibold transition hover:opacity-80"
+                                    style={{ background: "rgba(232,112,90,0.12)", color: "#E8705A" }}
+                                  >
+                                    {restoringStreak === s.id ? "…" : `Herstel (${s.streak_lost})`}
+                                  </button>
+                                )}
+                              </div>
                             </td>
                             <td className="py-2">{s.current_operation ?? "—"}</td>
                             <td className="py-2 text-dark/50">

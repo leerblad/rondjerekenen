@@ -19,7 +19,7 @@ export async function GET() {
 
   const { data: students } = await supabaseAdmin
     .from("students")
-    .select("id, nickname, class_code, grade, coins, current_operation, created_at")
+    .select("id, nickname, class_code, grade, coins, streak, streak_lost, current_operation, created_at")
     .order("created_at", { ascending: false });
 
   return NextResponse.json({ teachers: teachers ?? [], students: students ?? [] });

@@ -26,6 +26,8 @@ export type StudentUser = {
   level: number;
   background?: string;
   ownedBackgrounds: string[];
+  streak: number;
+  streakLost: number;
   currentOperation: string;
   avatarOutfit: Record<string, string>;
   avatarUrl?: string;

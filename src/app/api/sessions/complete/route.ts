@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { checkUnlock } from "@/lib/progress";
 import { MAX_LEVEL, STAGE_LABELS, levelToStage } from "@/lib/math";
+import { computeStreak } from "@/lib/streak";
 
 type IncomingAnswer = {
   question: string;
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
 
   const { data: student } = await supabaseAdmin
     .from("students")
-    .select("coins, level")
+    .select("coins, level, streak, streak_updated_date, streak_lost")
     .eq("id", studentId)
     .single();
 
@@ -104,9 +105,15 @@ export async function POST(req: Request) {
     }
   }
 
+  const streakUpdate = computeStreak(today, {
+    streak: student?.streak ?? 0,
+    streak_updated_date: student?.streak_updated_date ?? null,
+    streak_lost: student?.streak_lost ?? 0,
+  });
+
   await supabaseAdmin
     .from("students")
-    .update({ coins: newCoins, level: newLevel })
+    .update({ coins: newCoins, level: newLevel, ...streakUpdate })
     .eq("id", studentId);
 
   return NextResponse.json({
@@ -117,5 +124,6 @@ export async function POST(req: Request) {
     coins: newCoins,
     level: newLevel,
     unlockedStageLabel,
+    streak: streakUpdate.streak,
   });
 }
