@@ -155,12 +155,6 @@ export default function StudentPortal() {
         <div className="rounded-2xl bg-white/70 px-6 py-4 text-center backdrop-blur-sm">
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
 
-        {/* Streak */}
-        {student.streak > 0 && (
-          <p className="flex items-center gap-2 rounded-full bg-coral/15 px-5 py-2 font-mono text-lg font-bold text-coral">
-            🔥 {student.streak} {student.streak === 1 ? "dag" : "dagen"} op rij
-          </p>
-        )}
         {student.streakLost > 0 && student.streak <= 1 && (
           <div className="flex flex-col items-center gap-2">
             <p className="text-sm text-dark/50">Je reeks van {student.streakLost} dagen is verbroken.</p>
