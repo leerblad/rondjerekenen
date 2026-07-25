@@ -222,7 +222,7 @@ export default function StudentPortal() {
             ) : (
               <>
                 <span className="text-xl font-extrabold">Extra sessie!</span>
-                <span className="text-sm font-semibold text-white/80">Kost {BONUS_COST} munten · bij 80% goed: dubbele munten ×2</span>
+                <span className="text-sm font-semibold text-white/80">Kost {BONUS_COST} munten · bij 95% goed: dubbele munten ×2</span>
               </>
             )}
           </button>

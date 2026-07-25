@@ -130,6 +130,8 @@ function OefelenInner() {
   const [retryPool, setRetryPool] = useState<Question[]>([]);
   const [totalCoinsEarned, setTotalCoinsEarned] = useState(0);
   const [levelsCompleted, setLevelsCompleted] = useState<LevelResult[]>([]);
+  const [consolationCoins, setConsolationCoins] = useState(0);
+  const consolationCalledRef = useRef(false);
 
   const sessionStartRef = useRef<number>(0);
   const questionRef = useRef<Question | null>(null);
@@ -514,6 +516,27 @@ function OefelenInner() {
   }
 
   // ── Done screen ────────────────────────────────────────────────────────────
+  // Consolation coins: 10 if no level was passed this session (non-bonus only)
+  useEffect(() => {
+    if (phase !== "done" || isBonus || consolationCalledRef.current || !student) return;
+    if (levelsCompleted.some((r) => r.passed)) return;
+    consolationCalledRef.current = true;
+    fetch("/api/leerling/troost-munten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.consolation > 0) {
+          setConsolationCoins(d.consolation);
+          setTotalCoinsEarned((c) => c + d.consolation);
+          updateStudent({ coins: d.coins });
+        }
+      })
+      .catch(() => {});
+  }, [phase, isBonus, levelsCompleted, student, updateStudent]);
+
   if (phase === "done") {
     const totalCorrect = levelsCompleted.reduce((s, r) => s + r.correct, 0);
     const totalAnswered = levelsCompleted.reduce((s, r) => s + r.total, 0);

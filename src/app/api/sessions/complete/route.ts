@@ -11,8 +11,8 @@ type IncomingAnswer = {
   responseTimeMs: number;
 };
 
-const LEVEL_COINS = 10;
-const BONUS_COINS = 20;
+const LEVEL_COINS = 2;
+const BONUS_COINS = 4;
 
 export async function POST(req: Request) {
   const { studentId, level, bonus, answers } = (await req.json()) as {

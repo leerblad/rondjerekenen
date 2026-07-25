@@ -41,7 +41,7 @@ export const MAX_LEVEL = STAGES.length * LEVELS_PER_STAGE; // 140
 export const QUESTIONS_PER_LEVEL = 20;
 export const SESSION_SECONDS = 600; // 10 minutes
 export const BONUS_TIME_LIMIT = 2000; // 2s per question in bonus mode
-export const UNLOCK_THRESHOLD = 0.80; // 80% to advance
+export const UNLOCK_THRESHOLD = 0.95; // 95% to advance
 
 /** Global level (1-140) → which stage */
 export function levelToStage(level: number): Stage {
