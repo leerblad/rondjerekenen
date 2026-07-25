@@ -47,8 +47,8 @@ const IMAGE_FILES = [
   { key: "image-strand",     label: "Strand",     file: "strand_achtergrond.jpg" },
   { key: "image-minecraft",  label: "Minecraft",  file: "minecraft_achtergrond.png" },
   { key: "image-graffiti",   label: "Graffiti",   file: "graffiti_achtergrond.png" },
-  { key: "image-meisjes",    label: "Meisjes",    file: "meisjes_achtergrond.png" },
-  { key: "image-meisjes2",   label: "Meisjes 2",  file: "meisjes2_achtergrond.png" },
+  { key: "image-meisjes",    label: "Roze auto",  file: "meisjes_achtergrond.png" },
+  { key: "image-meisjes2",   label: "Ballon",     file: "meisjes2_achtergrond.png" },
   { key: "image-vuurwerk",   label: "Vuurwerk",   file: "vuurwerk_achtergrond.jpg" },
 ];
 
