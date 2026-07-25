@@ -15,7 +15,7 @@ import {
   MAX_LEVEL,
   levelToStage,
   withinStageLevel,
-  getUnlockThreshold,
+
 } from "@/lib/math";
 
 const BONUS_COST = 20;
@@ -99,7 +99,6 @@ export default function StudentPortal() {
   const level = student.level ?? 1;
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  const threshold = Math.round(getUnlockThreshold() * 100);
   const stageIndex = STAGES.indexOf(stage);
   const bg = student.background;
 
@@ -194,9 +193,14 @@ export default function StudentPortal() {
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-cream">
           <div className="h-3 rounded-full bg-purple transition-all" style={{ width: `${((wl - 1) / LEVELS_PER_STAGE) * 100}%` }} />
         </div>
-        {level < MAX_LEVEL && (
-          <p className="mt-3 text-center text-sm text-dark/50">
-            Haal 3 dagen achter elkaar {threshold}% goed om naar level {level + 1} te gaan
+        {student.streak > 0 && (
+          <p className="mt-3 text-center text-sm font-semibold text-coral">
+            🔥 Jouw reeks: {student.streak} {student.streak === 1 ? "dag" : "dagen"} op rij — houd hem vast!
+          </p>
+        )}
+        {student.streak === 0 && level < MAX_LEVEL && (
+          <p className="mt-3 text-center text-sm text-dark/40">
+            Oefen elke schooldag om een reeks op te bouwen!
           </p>
         )}
       </div>
