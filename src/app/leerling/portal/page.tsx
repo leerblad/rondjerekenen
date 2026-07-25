@@ -143,7 +143,7 @@ export default function StudentPortal() {
           title="Verander je figuur"
         >
           {student.avatarUrl ? (
-            <Image src={student.avatarUrl} alt="avatar" width={96} height={96} className="h-full w-full object-cover" />
+            <Image src={student.avatarUrl} alt="avatar" width={96} height={96} className="h-4/5 w-4/5 object-contain" />
           ) : (
             <span className="text-5xl">🧒</span>
           )}

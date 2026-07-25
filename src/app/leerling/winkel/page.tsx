@@ -181,7 +181,7 @@ export default function Winkel() {
           >
             {student.avatarUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={student.avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+              <img src={student.avatarUrl} alt="avatar" className="h-4/5 w-4/5 object-contain" />
             )}
           </div>
         </div>
