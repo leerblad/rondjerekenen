@@ -10,7 +10,7 @@ export async function checkUnlock(
   studentId: string,
   level: number
 ): Promise<boolean> {
-  const threshold = getUnlockThreshold(level);
+  const threshold = getUnlockThreshold();
 
   const { data: sessions } = await supabaseAdmin
     .from("sessions")

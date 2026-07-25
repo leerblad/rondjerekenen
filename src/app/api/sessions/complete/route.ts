@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { checkUnlock } from "@/lib/progress";
-import { MAX_LEVEL, STAGE_LABELS, levelToStage } from "@/lib/math";
+import { MAX_LEVEL, STAGE_LABELS, UNLOCK_THRESHOLD, levelToStage } from "@/lib/math";
 import { computeStreak } from "@/lib/streak";
 
 type IncomingAnswer = {
@@ -32,7 +31,7 @@ export async function POST(req: Request) {
   const today = new Date().toISOString().slice(0, 10);
   const operation = levelToStage(level);
 
-  // create session
+  // Save session
   const { data: session, error: sErr } = await supabaseAdmin
     .from("sessions")
     .insert({
@@ -65,19 +64,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // award coins once per day
-  const { count } = await supabaseAdmin
-    .from("sessions")
-    .select("id", { count: "exact", head: true })
-    .eq("student_id", studentId)
-    .eq("date", today)
-    .eq("completed", true);
-
+  // Load student
   const { data: student } = await supabaseAdmin
     .from("students")
     .select("coins, level, streak, streak_updated_date, streak_lost")
     .eq("id", studentId)
     .single();
+
+  // Award coins once per day (first non-bonus session)
+  const { count } = await supabaseAdmin
+    .from("sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("student_id", studentId)
+    .eq("date", today)
+    .eq("bonus", false)
+    .eq("completed", true);
 
   let coinsAwarded = 0;
   let newCoins = student?.coins ?? 0;
@@ -89,22 +90,21 @@ export async function POST(req: Request) {
     newCoins += DAILY_COINS;
   }
 
-  // check for level-up
+  // Advance level immediately if >= 80% correct
   let newLevel = student?.level ?? level;
   let unlockedStageLabel: string | null = null;
 
-  if (newLevel === level && newLevel < MAX_LEVEL) {
-    const shouldUnlock = await checkUnlock(studentId, level);
-    if (shouldUnlock) {
-      newLevel = level + 1;
-      const newStage = levelToStage(newLevel);
-      const oldStage = levelToStage(level);
-      if (newStage !== oldStage) {
-        unlockedStageLabel = STAGE_LABELS[newStage];
-      }
+  const pct = total > 0 ? correct / total : 0;
+  if (!bonus && newLevel === level && newLevel < MAX_LEVEL && pct >= UNLOCK_THRESHOLD) {
+    newLevel = level + 1;
+    const newStage = levelToStage(newLevel);
+    const oldStage = levelToStage(level);
+    if (newStage !== oldStage) {
+      unlockedStageLabel = STAGE_LABELS[newStage];
     }
   }
 
+  // Update streak
   const streakUpdate = computeStreak(today, {
     streak: student?.streak ?? 0,
     streak_updated_date: student?.streak_updated_date ?? null,

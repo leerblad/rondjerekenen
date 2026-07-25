@@ -99,7 +99,7 @@ export default function StudentPortal() {
   const level = student.level ?? 1;
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  const threshold = Math.round(getUnlockThreshold(level) * 100);
+  const threshold = Math.round(getUnlockThreshold() * 100);
   const stageIndex = STAGES.indexOf(stage);
   const bg = student.background;
 
