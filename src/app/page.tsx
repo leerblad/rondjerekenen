@@ -22,55 +22,31 @@ export default function Home() {
       <section className="mx-auto max-w-5xl px-6 pb-8 pt-4 sm:px-10">
         <div className="rounded-3xl bg-dark overflow-hidden">
 
-          {/* Top: avatars + tagline */}
-          <div className="flex flex-col items-center gap-2 px-8 pt-10 text-center sm:px-14">
+          <div className="flex flex-col items-center gap-2 px-8 py-12 text-center sm:px-14">
             <p className="rounded-full bg-coral/20 px-4 py-1 text-xs font-bold uppercase tracking-widest text-coral">
               Gratis · Geen app · Direct starten
             </p>
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-5xl">
-              Rekenen dat kinderen{" "}
-              <span className="text-coral">wíllen</span> doen.
+              Elke dag een rondje rekenen.{" "}
+              <span className="text-coral">Klaar in 10 minuten.</span>
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/60">
-              Tien minuten per dag, op eigen niveau. Leerlingen verdienen munten, bouwen een reeks op en klimmen door 140 levels — plus, min, keer en delen.
+              Leerlingen oefenen dagelijks op eigen niveau en verdienen munten, bouwen een reeks op en klimmen door 140 levels.
             </p>
-          </div>
-
-          {/* Avatars facing each other */}
-          <div className="relative mt-6 flex items-end justify-center gap-0">
-            {/* Leerkracht — gespiegeld zodat ze naar rechts kijkt */}
-            <div className="relative" style={{ transform: "scaleX(-1)" }}>
-              <Image
-                src="/avatars/leerkracht-vrouw-pen.png"
-                alt="Leerkracht"
-                width={160}
-                height={160}
-                className="object-contain drop-shadow-xl"
-              />
-            </div>
-
-            {/* Midden tekst */}
-            <div className="relative z-10 -mx-4 mb-8 flex flex-col items-center gap-3">
-              <div className="rounded-2xl bg-white/10 px-5 py-3 text-center backdrop-blur-sm">
-                <p className="text-xs font-semibold text-white/60">Al in gebruik bij</p>
-                <p className="text-lg font-extrabold text-white">groep 4 t/m 8</p>
-              </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
                 href="/leerkracht?tab=register"
                 className="rounded-full bg-coral px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
               >
-                Begin nu gratis →
+                Begin nu gratis
+              </Link>
+              <Link
+                href="/leerling?tab=login"
+                className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Ik ben leerling
               </Link>
             </div>
-
-            {/* Leerling */}
-            <Image
-              src="/avatars/leerling-jongen-1.png"
-              alt="Leerling"
-              width={130}
-              height={130}
-              className="object-contain drop-shadow-xl"
-            />
           </div>
 
         </div>
@@ -80,13 +56,12 @@ export default function Home() {
       <section className="mx-auto max-w-5xl px-6 pb-8 sm:px-10">
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: "⏱", title: "10 minuten per dag", text: "Kort genoeg om vol te houden, lang genoeg om echt te oefenen." },
-            { icon: "🪙", title: "Munten & levels", text: "Leerlingen worden gemotiveerd door beloningen en zichtbare voortgang." },
-            { icon: "📊", title: "Inzicht voor de leerkracht", text: "Zie wie er oefent, welke sommen moeilijk zijn en wie een steuntje nodig heeft." },
-          ].map(({ icon, title, text }) => (
+            { title: "10 minuten per dag", text: "Kort genoeg om vol te houden, lang genoeg om echt te oefenen." },
+            { title: "Munten & levels", text: "Leerlingen worden gemotiveerd door beloningen en zichtbare voortgang." },
+            { title: "Inzicht voor de leerkracht", text: "Zie wie er oefent, welke sommen moeilijk zijn en wie een steuntje nodig heeft." },
+          ].map(({ title, text }) => (
             <div key={title} className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="text-2xl">{icon}</p>
-              <p className="mt-2 font-bold">{title}</p>
+              <p className="font-bold">{title}</p>
               <p className="mt-1 text-sm leading-relaxed text-dark/50">{text}</p>
             </div>
           ))}
