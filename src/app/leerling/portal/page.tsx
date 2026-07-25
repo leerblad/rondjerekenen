@@ -152,7 +152,7 @@ export default function StudentPortal() {
             Wijzig
           </span>
         </button>
-        <div className="rounded-2xl bg-white/70 px-6 py-4 text-center backdrop-blur-sm">
+        <div className="rounded-2xl bg-white/70 px-6 py-5 text-center backdrop-blur-sm">
         <h1 className="text-3xl font-extrabold">Hoi {student.nickname}!</h1>
 
         {student.streakLost > 0 && student.streak <= 1 && (
@@ -168,7 +168,7 @@ export default function StudentPortal() {
           </div>
         )}
 
-        <p className="flex items-center gap-2 rounded-full bg-yellow/20 px-5 py-2 font-mono text-xl font-bold text-dark">
+        <p className="mt-2 flex items-center gap-2 rounded-full bg-yellow/20 px-5 py-2 font-mono text-xl font-bold text-dark">
           <Illustration name="coin" size={22} />
           {student.coins} munten
         </p>
@@ -215,11 +215,14 @@ export default function StudentPortal() {
           <button
             onClick={buyBonus}
             disabled={buyingBonus || student.coins < BONUS_COST}
-            className="flex items-center justify-center gap-3 rounded-3xl bg-purple py-6 text-center text-xl font-extrabold text-white shadow-lg transition hover:opacity-90 disabled:opacity-40"
+            className="flex flex-col items-center justify-center gap-1 rounded-3xl bg-purple py-5 text-center text-white shadow-lg transition hover:opacity-90 disabled:opacity-40"
           >
-            {buyingBonus ? "Bezig..." : (
+            {buyingBonus ? (
+              <span className="text-xl font-extrabold">Bezig...</span>
+            ) : (
               <>
-                Extra sessie! <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">{BONUS_COST} munten</span>
+                <span className="text-xl font-extrabold">Extra sessie!</span>
+                <span className="text-sm font-semibold text-white/80">Kost {BONUS_COST} munten · bij 80% goed: dubbele munten ×2</span>
               </>
             )}
           </button>
