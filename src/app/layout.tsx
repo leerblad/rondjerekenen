@@ -17,7 +17,7 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "Rondje Rekenen",
   description: "Dagelijks rekenen oefenen voor groep 4 t/m 8",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({
