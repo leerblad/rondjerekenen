@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /leerling/
+Disallow: /leerkracht/
+
+Sitemap: https://www.rondjerekenen.nl/sitemap.xml
