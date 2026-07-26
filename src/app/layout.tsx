@@ -51,6 +51,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl" className={`${outfit.variable} ${dmMono.variable}`}>
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQCZNKJ4BG" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-RQCZNKJ4BG');
+        `}} />
+      </head>
       <body className="min-h-screen antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>
