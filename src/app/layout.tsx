@@ -42,7 +42,6 @@ export const metadata: Metadata = {
     images: [{ url: "https://www.rondjerekenen.nl/Rekenenlogo.jpg", width: 1200, height: 630 }],
   },
   verification: { google: "WYGrVOQB4daY4yvPH0zJU40BKOhXJjBL1vnHCi6o9d0" },
-  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({
