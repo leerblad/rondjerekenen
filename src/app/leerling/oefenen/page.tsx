@@ -364,6 +364,27 @@ function OefelenInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, student]);
 
+  // Consolation coins: 10 if no level was passed this session (non-bonus only)
+  useEffect(() => {
+    if (phase !== "done" || isBonus || consolationCalledRef.current || !student) return;
+    if (levelsCompleted.some((r) => r.passed)) return;
+    consolationCalledRef.current = true;
+    fetch("/api/leerling/troost-munten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.consolation > 0) {
+          setConsolationCoins(d.consolation);
+          setTotalCoinsEarned((c) => c + d.consolation);
+          updateStudent({ coins: d.coins });
+        }
+      })
+      .catch(() => {});
+  }, [phase, isBonus, levelsCompleted, student, updateStudent]);
+
   // ── Go to next level ───────────────────────────────────────────────────────
   const goNextLevel = useCallback((result: LevelResult) => {
     const nextLvl = result.newLevel > result.level ? result.newLevel : result.level;
@@ -514,28 +535,6 @@ function OefelenInner() {
       </main>
     );
   }
-
-  // ── Done screen ────────────────────────────────────────────────────────────
-  // Consolation coins: 10 if no level was passed this session (non-bonus only)
-  useEffect(() => {
-    if (phase !== "done" || isBonus || consolationCalledRef.current || !student) return;
-    if (levelsCompleted.some((r) => r.passed)) return;
-    consolationCalledRef.current = true;
-    fetch("/api/leerling/troost-munten", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId: student.id }),
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.consolation > 0) {
-          setConsolationCoins(d.consolation);
-          setTotalCoinsEarned((c) => c + d.consolation);
-          updateStudent({ coins: d.coins });
-        }
-      })
-      .catch(() => {});
-  }, [phase, isBonus, levelsCompleted, student, updateStudent]);
 
   if (phase === "done") {
     const totalCorrect = levelsCompleted.reduce((s, r) => s + r.correct, 0);
