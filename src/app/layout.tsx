@@ -3,6 +3,7 @@ import { Outfit, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -63,6 +64,7 @@ export default function RootLayout({
       <body className="min-h-screen antialiased">
         <AuthProvider>{children}</AuthProvider>
         <Analytics />
+        <CookieBanner />
       </body>
     </html>
   );
