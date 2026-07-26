@@ -31,7 +31,7 @@ export default function Home() {
               <span className="text-coral">Klaar in 10 minuten.</span>
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/60">
-              Leerlingen oefenen dagelijks op eigen niveau en verdienen munten, bouwen een reeks op en klimmen door 140 levels.
+              Dé tool voor het automatiseren van rekenen. Leerlingen oefenen dagelijks op eigen niveau en verdienen munten, bouwen een reeks op en klimmen door 140 levels.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
