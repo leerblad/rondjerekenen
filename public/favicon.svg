@@ -1,25 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <!-- background -->
-  <rect width="100" height="100" fill="#F5F0E8" rx="16"/>
+  <rect width="100" height="100" rx="18" fill="#F7F2EA"/>
 
   <!-- top-left: coral ring -->
-  <circle cx="27" cy="27" r="19" fill="#E07B6A"/>
-  <circle cx="27" cy="27" r="10" fill="#F5F0E8"/>
+  <circle cx="26" cy="26" r="20" fill="#E07B6A"/>
+  <circle cx="26" cy="26" r="11" fill="#F7F2EA"/>
 
-  <!-- top-right: yellow teardrop with + -->
-  <ellipse cx="73" cy="23" rx="18" ry="18" fill="#F5C842"/>
-  <rect x="70" y="13" width="6" height="20" rx="3" fill="#1a1a1a"/>
-  <rect x="63" y="20" width="20" height="6" rx="3" fill="#1a1a1a"/>
-  <!-- teardrop point -->
-  <ellipse cx="73" cy="39" rx="9" ry="9" fill="#F5C842"/>
+  <!-- top-right: yellow teardrop (circle + pointed corner toward bottom-left) with + -->
+  <path d="M52,8 Q52,8 74,8 Q92,8 92,26 Q92,44 74,44 Q58,44 54,42 Q48,50 48,50 Q48,50 52,44 Q52,44 52,26 Q52,8 52,8 Z" fill="#F5C842"/>
+  <!-- + symbol -->
+  <rect x="70" y="17" width="5" height="18" rx="2.5" fill="#1a1a1a"/>
+  <rect x="64" y="23" width="17" height="5" rx="2.5" fill="#1a1a1a"/>
 
-  <!-- bottom-left: purple teardrop with = -->
-  <ellipse cx="27" cy="77" rx="18" ry="18" fill="#9B9DE8"/>
-  <ellipse cx="27" cy="61" rx="9" ry="9" fill="#9B9DE8"/>
-  <rect x="16" y="71" width="22" height="5" rx="2.5" fill="#1a1a1a"/>
-  <rect x="16" y="80" width="22" height="5" rx="2.5" fill="#1a1a1a"/>
+  <!-- bottom-left: purple teardrop (circle + pointed corner toward top-right) with = -->
+  <path d="M8,52 Q8,52 8,74 Q8,92 26,92 Q44,92 44,74 Q44,58 42,54 Q50,48 50,48 Q50,48 44,52 Q44,52 26,52 Q8,52 8,52 Z" fill="#9B9DE0"/>
+  <!-- = symbol -->
+  <rect x="14" y="69" width="22" height="5" rx="2.5" fill="#1a1a1a"/>
+  <rect x="14" y="79" width="22" height="5" rx="2.5" fill="#1a1a1a"/>
 
   <!-- bottom-right: green ring -->
-  <circle cx="73" cy="73" r="19" fill="#3DBE7E"/>
-  <circle cx="73" cy="73" r="10" fill="#F5F0E8"/>
+  <circle cx="74" cy="74" r="20" fill="#3DBE7E"/>
+  <circle cx="74" cy="74" r="11" fill="#F7F2EA"/>
 </svg>
