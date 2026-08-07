@@ -172,6 +172,18 @@ export default function Portal() {
     });
   }
 
+  async function resetPassword(id: string) {
+    const newPassword = prompt("Nieuw wachtwoord voor deze leerling (minimaal 4 tekens):");
+    if (!newPassword || newPassword.length < 4) return;
+    const res = await fetch("/api/leerkracht/student", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: id, newPassword }),
+    });
+    if (res.ok) alert("Wachtwoord aangepast!");
+    else alert("Er ging iets mis.");
+  }
+
   async function newCode() {
     if (!teacher) return;
     if (
@@ -466,6 +478,17 @@ export default function Portal() {
                   Huidig: level {selected.level ?? 1} — {STAGE_LABELS[levelToStage(selected.level ?? 1)]}, level {withinStageLevel(selected.level ?? 1)} van 20
                 </p>
               </div>
+            </div>
+
+            {/* Wachtwoord resetten */}
+            <div className="mt-4 rounded-2xl border border-black/10 p-4">
+              <p className="text-sm font-semibold mb-2">Wachtwoord</p>
+              <button
+                onClick={() => resetPassword(selected.id)}
+                className="rounded-full border border-coral px-4 py-2 text-sm font-semibold text-coral transition hover:bg-coral hover:text-white"
+              >
+                Wachtwoord opnieuw instellen
+              </button>
             </div>
 
             {!progress && <p className="mt-6 text-dark/40">Laden...</p>}

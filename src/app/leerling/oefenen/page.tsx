@@ -26,6 +26,7 @@ type RecordedAnswer = {
   correctAnswer: number;
   studentAnswer: number | null;
   isCorrect: boolean;
+  isTimeout: boolean;
   responseTimeMs: number;
   qA: number;
   qB: number;
@@ -46,14 +47,18 @@ type LevelResult = {
 
 // ─── Mastery grid ─────────────────────────────────────────────────────────────
 
+type CellResult = "correct" | "wrong" | "timeout";
+
 function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: number }) {
   const range = Array.from({ length: 11 }, (_, i) => i);
 
   const stage = levelToStage(level);
-  const resultMap = new Map<string, boolean>();
+  const resultMap = new Map<string, CellResult>();
   for (const a of answers) {
     const key = `${a.qA}-${a.qB}`;
-    if (!resultMap.has(key)) resultMap.set(key, a.isCorrect);
+    if (!resultMap.has(key)) {
+      resultMap.set(key, a.isCorrect ? "correct" : a.isTimeout ? "timeout" : "wrong");
+    }
   }
 
   const isMin = stage === "min" || stage === "plus_min";
@@ -76,21 +81,24 @@ function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: num
             <tr key={a}>
               <td className="p-0.5 font-mono font-semibold text-dark/40">{a}</td>
               {range.map((b) => {
-                // For subtraction, skip where b > a
-                if (isMin && b > a) {
-                  return <td key={b} className="p-0.5" />;
-                }
+                if (isMin && b > a) return <td key={b} className="p-0.5" />;
                 const key = `${a}-${b}`;
                 const result = resultMap.get(key);
                 const bg =
-                  result === true ? "bg-green" :
-                  result === false ? "bg-coral" :
+                  result === "correct" ? "bg-green" :
+                  result === "wrong"   ? "bg-coral" :
+                  result === "timeout" ? "bg-purple" :
                   "bg-cream";
-                const text = result === true ? "text-white" : result === false ? "text-white" : "text-dark/20";
+                const text = result ? "text-white" : "text-dark/20";
+                const symbol =
+                  result === "correct" ? "✓" :
+                  result === "wrong"   ? "✕" :
+                  result === "timeout" ? "⏱" :
+                  "·";
                 return (
-                  <td key={b} className={`p-0.5`}>
+                  <td key={b} className="p-0.5">
                     <div className={`flex h-5 w-5 items-center justify-center rounded ${bg} ${text}`}>
-                      {result === false ? "✕" : result === true ? "✓" : "·"}
+                      {symbol}
                     </div>
                   </td>
                 );
@@ -99,9 +107,10 @@ function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: num
           ))}
         </tbody>
       </table>
-      <p className="mt-1 text-xs text-dark/30">
-        <span className="inline-block h-3 w-3 rounded bg-green mr-1" />goed
-        <span className="inline-block h-3 w-3 rounded bg-coral mx-1 ml-2" />fout
+      <p className="mt-1 text-xs text-dark/30 flex items-center gap-2 flex-wrap">
+        <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-green" />goed</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-coral" />fout</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-purple" />te laat</span>
       </p>
     </div>
   );
@@ -277,6 +286,7 @@ function OefelenInner() {
           correctAnswer: curr.answer,
           studentAnswer: null,
           isCorrect: false,
+          isTimeout: true,
           responseTimeMs: timeLimit,
           qA: curr.a,
           qB: curr.b,
@@ -310,6 +320,7 @@ function OefelenInner() {
       correctAnswer: q.answer,
       studentAnswer: choice,
       isCorrect,
+      isTimeout: false,
       responseTimeMs: Date.now() - startRef.current,
       qA: q.a,
       qB: q.b,
