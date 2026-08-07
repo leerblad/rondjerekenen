@@ -9,13 +9,15 @@ import { Illustration } from "@/components/Illustration";
 import { AvatarPicker, STUDENT_AVATARS, avatarUrl } from "@/components/AvatarPicker";
 import { backgroundStyle } from "@/app/leerling/winkel/page";
 import {
-  STAGES,
   STAGE_LABELS,
   LEVELS_PER_STAGE,
   MAX_LEVEL,
   levelToStage,
   withinStageLevel,
-
+  levelToGrade,
+  GRADE_STAGES,
+  withinGradeLevel,
+  LEVELS_PER_GRADE,
 } from "@/lib/math";
 
 const BONUS_COST = 20;
@@ -99,7 +101,10 @@ export default function StudentPortal() {
   const level = student.level ?? 1;
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  const stageIndex = STAGES.indexOf(stage);
+  const grade = levelToGrade(level);
+  const gradeStages = GRADE_STAGES[grade];
+  const stageIndexInGrade = gradeStages.indexOf(stage);
+  const wlInGrade = withinGradeLevel(level);
   const bg = student.background;
 
   if (pickingAvatar) {
@@ -181,11 +186,12 @@ export default function StudentPortal() {
       {/* Level info */}
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-xl font-extrabold">Level {level}{level >= MAX_LEVEL && " 🏆"}</h2>
+          <h2 className="text-xl font-extrabold">Groep {grade}{level >= MAX_LEVEL && " 🏆"}</h2>
           <span className="text-sm text-dark/50">{STAGE_LABELS[stage]} — {wl}/20</span>
         </div>
+        <p className="mt-1 text-xs text-dark/40">Level {wlInGrade} van {LEVELS_PER_GRADE} in groep {grade}</p>
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-cream">
-          <div className="h-3 rounded-full bg-purple transition-all" style={{ width: `${((wl - 1) / LEVELS_PER_STAGE) * 100}%` }} />
+          <div className="h-3 rounded-full bg-purple transition-all" style={{ width: `${((wlInGrade - 1) / LEVELS_PER_GRADE) * 100}%` }} />
         </div>
         {student.streak > 0 && (
           <p className="mt-3 text-center text-sm font-semibold text-coral">
@@ -232,13 +238,13 @@ export default function StudentPortal() {
         </div>
       )}
 
-      {/* Fase overzicht */}
+      {/* Fase overzicht — alleen blokken van huidige groep */}
       <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-bold">Jouw parcours</h2>
+        <h2 className="mb-3 font-bold">Jouw parcours — Groep {grade}</h2>
         <div className="flex flex-col gap-2">
-          {STAGES.map((s, i) => {
-            const done = i < stageIndex;
-            const current = i === stageIndex;
+          {gradeStages.map((s, i) => {
+            const done = i < stageIndexInGrade;
+            const current = i === stageIndexInGrade;
             return (
               <div
                 key={s}

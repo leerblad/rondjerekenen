@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
-import { OPERATION_LABELS, Operation, STAGES, STAGE_LABELS, LEVELS_PER_STAGE, levelToStage, withinStageLevel } from "@/lib/math";
+import { OPERATION_LABELS, Operation, STAGE_LABELS, LEVELS_PER_STAGE, levelToStage, withinStageLevel, GRADE_STAGES, GRADE_START_LEVEL, type Grade } from "@/lib/math";
 import { Illustration } from "@/components/Illustration";
 
 type Message = {
@@ -438,33 +438,57 @@ export default function Portal() {
               {selected.streak}
             </p>
 
-            {/* Level aanpassen */}
+            {/* Level aanpassen — groep → blok → level */}
             <div className="mt-4 rounded-2xl bg-cream p-4">
               <p className="mb-2 text-sm font-semibold">Level aanpassen</p>
               <div className="flex flex-col gap-2">
+                {/* Groep */}
                 <div className="flex items-center gap-2">
-                  <label className="w-24 text-xs text-dark/60">Onderdeel</label>
+                  <label className="w-20 text-xs text-dark/60">Groep</label>
                   <select
-                    value={levelToStage(selected.level ?? 1)}
+                    value={Math.floor((selected.level ?? 1) <= 120 ? 4 : (selected.level ?? 1) <= 240 ? 5 : (selected.level ?? 1) <= 360 ? 6 : (selected.level ?? 1) <= 480 ? 7 : 8)}
                     onChange={(e) => {
-                      const stageIdx = STAGES.indexOf(e.target.value as typeof STAGES[number]);
-                      const newLevel = stageIdx * LEVELS_PER_STAGE + 1;
-                      changeLevel(selected.id, newLevel);
+                      const g = Number(e.target.value) as Grade;
+                      changeLevel(selected.id, GRADE_START_LEVEL[g]);
                     }}
                     className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
                   >
-                    {STAGES.map((s) => (
-                      <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+                    {([4,5,6,7,8] as Grade[]).map((g) => (
+                      <option key={g} value={g}>Groep {g}</option>
                     ))}
                   </select>
                 </div>
+                {/* Blok */}
                 <div className="flex items-center gap-2">
-                  <label className="w-24 text-xs text-dark/60">Level (1–20)</label>
+                  <label className="w-20 text-xs text-dark/60">Blok</label>
+                  <select
+                    value={levelToStage(selected.level ?? 1)}
+                    onChange={(e) => {
+                      const stage = e.target.value as keyof typeof STAGE_LABELS;
+                      const g = Math.floor((selected.level ?? 1) <= 120 ? 4 : (selected.level ?? 1) <= 240 ? 5 : (selected.level ?? 1) <= 360 ? 6 : (selected.level ?? 1) <= 480 ? 7 : 8) as Grade;
+                      const stageIdx = GRADE_STAGES[g].indexOf(stage as typeof GRADE_STAGES[typeof g][number]);
+                      const newLevel = GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE;
+                      changeLevel(selected.id, newLevel + 1);
+                    }}
+                    className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
+                  >
+                    {(() => {
+                      const g = Math.floor((selected.level ?? 1) <= 120 ? 4 : (selected.level ?? 1) <= 240 ? 5 : (selected.level ?? 1) <= 360 ? 6 : (selected.level ?? 1) <= 480 ? 7 : 8) as Grade;
+                      return GRADE_STAGES[g].map((s) => (
+                        <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+                      ));
+                    })()}
+                  </select>
+                </div>
+                {/* Level binnen blok */}
+                <div className="flex items-center gap-2">
+                  <label className="w-20 text-xs text-dark/60">Level (1–20)</label>
                   <select
                     value={withinStageLevel(selected.level ?? 1)}
                     onChange={(e) => {
-                      const stageIdx = STAGES.indexOf(levelToStage(selected.level ?? 1));
-                      const newLevel = stageIdx * LEVELS_PER_STAGE + Number(e.target.value);
+                      const g = Math.floor((selected.level ?? 1) <= 120 ? 4 : (selected.level ?? 1) <= 240 ? 5 : (selected.level ?? 1) <= 360 ? 6 : (selected.level ?? 1) <= 480 ? 7 : 8) as Grade;
+                      const stageIdx = GRADE_STAGES[g].indexOf(levelToStage(selected.level ?? 1) as typeof GRADE_STAGES[typeof g][number]);
+                      const newLevel = GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE + Number(e.target.value) - 1;
                       changeLevel(selected.id, newLevel);
                     }}
                     className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
@@ -475,7 +499,7 @@ export default function Portal() {
                   </select>
                 </div>
                 <p className="text-xs text-dark/40">
-                  Huidig: level {selected.level ?? 1} — {STAGE_LABELS[levelToStage(selected.level ?? 1)]}, level {withinStageLevel(selected.level ?? 1)} van 20
+                  Huidig blok: {STAGE_LABELS[levelToStage(selected.level ?? 1)]}, level {withinStageLevel(selected.level ?? 1)} van 20
                 </p>
               </div>
             </div>
