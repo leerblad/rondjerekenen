@@ -21,12 +21,17 @@ export async function GET(
     students.map(async (s) => {
       const { data: sessions } = await supabaseAdmin
         .from("sessions")
-        .select("date, total, correct, operation, completed")
+        .select("date, total, correct, operation, completed, bonus")
         .eq("student_id", s.id)
         .eq("completed", true)
         .order("date", { ascending: false });
 
-      const doneToday = (sessions || []).some((x) => x.date === today);
+      // "klaar" = completed a full non-bonus session today (≥ 20 questions)
+      // "bezig" = has some activity today but not yet a full session
+      const todaySessions = (sessions || []).filter((x) => x.date === today && !x.bonus);
+      const totalQuestionsToday = todaySessions.reduce((sum: number, x: { total: number }) => sum + (x.total ?? 0), 0);
+      const doneToday = totalQuestionsToday >= 20;
+      const busyToday = !doneToday && totalQuestionsToday > 0;
 
       // streak of consecutive days ending today/yesterday
       const days = Array.from(
@@ -54,6 +59,7 @@ export async function GET(
         level: s.level ?? 1,
         currentOperation: s.current_operation,
         doneToday,
+        busyToday,
         streak,
       };
     })

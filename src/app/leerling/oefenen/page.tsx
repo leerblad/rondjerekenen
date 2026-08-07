@@ -155,6 +155,9 @@ function OefelenInner() {
   const startedRef = useRef(false);
   const finishingRef = useRef(false);
   const timeUpRef = useRef(false); // soft timer: finish current level before stopping
+  const pausedMsRef = useRef<number>(0);   // total ms spent paused
+  const pausedAtRef = useRef<number | null>(null); // timestamp of current pause start
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (ready && !student) router.replace("/leerling");
@@ -167,11 +170,35 @@ function OefelenInner() {
     if (totalTimerRef.current) { clearInterval(totalTimerRef.current); totalTimerRef.current = null; }
   };
 
+  /** Returns elapsed session seconds, excluding paused time */
+  const elapsedSecs = useCallback(() => {
+    const paused = pausedMsRef.current + (pausedAtRef.current ? Date.now() - pausedAtRef.current : 0);
+    return Math.floor((Date.now() - sessionStartRef.current - paused) / 1000);
+  }, []);
+
   // ── Finish the entire session ──────────────────────────────────────────────
   const endSession = useCallback(() => {
     clearQTimer();
     clearTotalTimer();
     setPhase("done");
+  }, []);
+
+  // ── Pause / resume ────────────────────────────────────────────────────────
+  const pauseSession = useCallback(() => {
+    if (pausedAtRef.current) return; // already paused
+    pausedAtRef.current = Date.now();
+    clearQTimer();
+    // Don't clear the total timer — it already skips ticks while pausedAtRef is set
+    setIsPaused(true);
+  }, []);
+
+  const resumeSession = useCallback((startQ: (rec: RecordedAnswer[], lvl: number, pool: Question[]) => void) => {
+    if (!pausedAtRef.current) return;
+    pausedMsRef.current += Date.now() - pausedAtRef.current;
+    pausedAtRef.current = null;
+    setIsPaused(false);
+    // Restart the per-question timer (give full time again — fair to the student)
+    startQ(answersRef.current, currentLevelRef.current, retryPoolRef.current);
   }, []);
 
   // ── Finish one level attempt ───────────────────────────────────────────────
@@ -377,9 +404,10 @@ function OefelenInner() {
     setPhase("playing");
 
     if (!isBonus) {
-      // 10-minute total countdown
+      // 10-minute total countdown (paused time is excluded via elapsedSecs)
       totalTimerRef.current = setInterval(() => {
-        const secs = Math.max(0, SESSION_SECONDS - Math.floor((Date.now() - sessionStartRef.current) / 1000));
+        if (pausedAtRef.current) return; // timer ticks but display doesn't change while paused
+        const secs = Math.max(0, SESSION_SECONDS - elapsedSecs());
         setTotalSecsLeft(secs);
         if (secs <= 0 && !timeUpRef.current) {
           timeUpRef.current = true;
@@ -401,6 +429,24 @@ function OefelenInner() {
     return () => { clearQTimer(); clearTotalTimer(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, student]);
+
+  // Page Visibility API: auto-pause when tab is hidden, resume when visible
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        // Only pause if we're actively playing
+        if (phase === "playing" && !pausedAtRef.current) {
+          pauseSession();
+        }
+      } else {
+        if (pausedAtRef.current) {
+          resumeSession(startQuestion);
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [phase, pauseSession, resumeSession, startQuestion]);
 
   // Consolation coins: 10 if no level was passed this session (non-bonus only)
   useEffect(() => {
@@ -650,12 +696,37 @@ function OefelenInner() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-8">
+      {/* Paused overlay */}
+      {isPaused && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-dark/80 text-center text-white">
+          <p className="text-5xl">⏸️</p>
+          <h2 className="text-2xl font-extrabold">Gepauzeerd</h2>
+          <p className="text-sm text-white/60">De timer staat stil.</p>
+          <button
+            onClick={() => resumeSession(startQuestion)}
+            className="rounded-full bg-coral px-8 py-4 text-lg font-extrabold text-white transition hover:opacity-90"
+          >
+            ▶ Verder spelen
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between text-sm text-dark/50">
         <button onClick={endSession} className="hover:text-coral">✕ Stoppen</button>
-        <span className="font-mono text-xs">
-          {isBonus ? "Bonus" : `${minsLeft}:${secsLeftMod.toString().padStart(2, "0")}`}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs">
+            {isBonus ? "Bonus" : `${minsLeft}:${secsLeftMod.toString().padStart(2, "0")}`}
+          </span>
+          {!isBonus && (
+            <button
+              onClick={() => isPaused ? resumeSession(startQuestion) : pauseSession()}
+              className="rounded-full bg-cream px-2 py-0.5 text-xs font-semibold text-dark/60 hover:bg-black/10"
+            >
+              {isPaused ? "▶" : "⏸"}
+            </button>
+          )}
+        </div>
         <span className="font-mono text-xs">{qIndex + 1}/{QUESTIONS_PER_LEVEL}</span>
       </div>
 

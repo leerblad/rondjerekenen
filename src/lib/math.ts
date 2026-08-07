@@ -37,17 +37,41 @@ export const STAGES: Stage[] = [
 ];
 
 export const STAGE_LABELS: Record<Stage, string> = {
-  g4_plus: "Plus", g4_min: "Min", g4_plus_min: "Plus & Min",
-  g4_tafels: "Tafels 2, 5, 10", g4_halveren: "Halveren & Splitsingen", g4_alles: "Alles",
-  g5_plus: "Plus", g5_min: "Min", g5_plus_min: "Plus & Min",
-  g5_tafels: "Tafels", g5_deeltafels: "Deeltafels", g5_tafels_alles: "Tafels & Deeltafels",
-  g6_tafels: "Tafels snel", g6_deeltafels: "Deeltafels snel", g6_hogere: "Hogere tafels",
-  g6_plus: "Plus t/m 50", g6_min: "Min vanaf 50", g6_alles: "Alles",
-  g7_tafels: "Hogere tafels snel", g7_deeltafels: "Hogere deeltafels snel",
-  g7_plus: "Plus t/m 100", g7_min: "Min vanaf 100", g7_plus_min: "Plus & Min", g7_alles: "Alles",
-  g8_plus: "Plus t/m 1000", g8_min: "Min vanaf 1000",
-  g8_pct_basis: "Procenten (10%, 25%)", g8_pct_meer: "Meer procenten",
-  g8_plus_min: "Grote sommen", g8_alles: "Alles",
+  // Groep 4
+  g4_plus:      "Optellen t/m 20",
+  g4_min:       "Aftrekken t/m 20",
+  g4_plus_min:  "Optellen & aftrekken t/m 20",
+  g4_tafels:    "Tafels 2, 5 en 10",
+  g4_halveren:  "Halveren & splitsingen",
+  g4_alles:     "Alles groep 4",
+  // Groep 5
+  g5_plus:         "Optellen t/m 100",
+  g5_min:          "Aftrekken t/m 100",
+  g5_plus_min:     "Optellen & aftrekken t/m 100",
+  g5_tafels:       "Alle tafels (1-10)",
+  g5_deeltafels:   "Alle deeltafels (1-10)",
+  g5_tafels_alles: "Tafels & deeltafels",
+  // Groep 6
+  g6_tafels:    "Tafels snel",
+  g6_deeltafels:"Deeltafels snel",
+  g6_hogere:    "Hogere tafels (×10, ×25...)",
+  g6_plus:      "Optellen t/m 100",
+  g6_min:       "Aftrekken t/m 100",
+  g6_alles:     "Alles groep 6",
+  // Groep 7
+  g7_tafels:    "Hogere tafels snel",
+  g7_deeltafels:"Hogere deeltafels snel",
+  g7_plus:      "Optellen t/m 1000",
+  g7_min:       "Aftrekken t/m 1000",
+  g7_plus_min:  "Optellen & aftrekken t/m 1000",
+  g7_alles:     "Alles groep 7",
+  // Groep 8
+  g8_plus:      "Optellen t/m 10.000",
+  g8_min:       "Aftrekken t/m 10.000",
+  g8_pct_basis: "Procenten (10%, 25%, 50%)",
+  g8_pct_meer:  "Meer procenten",
+  g8_plus_min:  "Grote sommen",
+  g8_alles:     "Alles groep 8",
 };
 
 // ─── Grade grouping ───────────────────────────────────────────────────────────
@@ -110,7 +134,7 @@ export function withinGradeLevel(level: number): number {
 export function getTimeLimit(level: number): number {
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  // Groep 6 tafels & groep 7 tafels: 3s → 2s (need to be fast)
+  // Groep 6 tafels & groep 7 tafels/deeltafels: 3s → 2s (automatiseren = snel!)
   if (stage === "g6_tafels" || stage === "g6_deeltafels" ||
       stage === "g7_tafels" || stage === "g7_deeltafels") {
     return Math.round(3000 - (wl - 1) * (1000 / 19));
@@ -132,12 +156,8 @@ export type Question = {
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
 function rnd(min: number, max: number): number {
+  if (max < min) return min;
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function biasedRnd(max: number, wl: number): number {
-  const power = 3 - (wl - 1) * (2 / 19);
-  return Math.min(max, Math.floor(Math.pow(Math.random(), power) * (max + 1)));
 }
 
 function pickFrom<T>(arr: T[]): T {
@@ -149,79 +169,91 @@ function scale(wl: number, startVal: number, endVal: number): number {
   return Math.round(startVal + (wl - 1) * (endVal - startVal) / 19);
 }
 
-// ─── Groep 4 ──────────────────────────────────────────────────────────────────
+// ─── Groep 4 ─────────────────────────────────────────────────────────────────
+// Optellen/aftrekken t/m 20, tafels 2/5/10, halveren en splitsingen
 
 function makeG4Plus(wl: number): Question {
-  const max = scale(wl, 4, 20);
-  const a = biasedRnd(max, wl);
-  const b = biasedRnd(Math.min(max - a, max), wl);
+  // wl=1: max=5 (2+3=5), wl=20: max=20 (12+8=20)
+  const max = scale(wl, 5, 20);
+  const a = rnd(1, max - 1);
+  const b = rnd(1, max - a);
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG4Min(wl: number): Question {
-  const max = scale(wl, 4, 20);
-  const a = rnd(1, max);
-  const b = biasedRnd(a, wl);
-  return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
-}
-
-function makeG4Tafel(wl: number): Question {
-  const tafels = wl <= 8 ? [2, 5] : wl <= 14 ? [2, 5, 10] : [2, 5, 10];
-  const b = pickFrom(tafels);
-  const a = rnd(1, scale(wl, 2, 10));
-  return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
-}
-
-function makeG4Halveren(wl: number): Question {
-  if (Math.random() < 0.5) {
-    // halveren
-    const maxHalf = scale(wl, 2, 10);
-    const half = rnd(1, maxHalf);
-    const val = half * 2;
-    return { question: `${val} ÷ 2 = ?`, answer: half, operation: "deel", a: half, b: 2 };
-  }
-  // splitsing tot 10
-  const total = scale(wl, 3, 10);
-  const a = rnd(0, total);
-  const b = total - a;
-  return { question: `${a} + ${b} = ?`, answer: total, operation: "plus", a, b };
-}
-
-// ─── Groep 5 ──────────────────────────────────────────────────────────────────
-
-function makeG5Plus(wl: number): Question {
-  const max = scale(wl, 10, 100);
-  const a = rnd(1, max - 1);
-  const b = rnd(1, Math.min(max - a, max));
-  return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
-}
-
-function makeG5Min(wl: number): Question {
-  const max = scale(wl, 10, 100);
+  // wl=1: a up to 5, wl=20: a up to 20; result always ≥ 1
+  const max = scale(wl, 5, 20);
   const a = rnd(2, max);
   const b = rnd(1, a - 1);
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
+function makeG4Tafel(wl: number): Question {
+  // wl 1-6: only ×2; wl 7-12: ×2 and ×5; wl 13-20: ×2, ×5 and ×10
+  const tafels = wl <= 6 ? [2] : wl <= 12 ? [2, 5] : [2, 5, 10];
+  const b = pickFrom(tafels);
+  const maxA = scale(wl, 3, 10);
+  const a = rnd(1, maxA);
+  return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
+}
+
+function makeG4Halveren(wl: number): Question {
+  if (Math.random() < 0.6) {
+    // halveren: halve of an even number
+    const maxHalf = scale(wl, 2, 10);
+    const half = rnd(1, maxHalf);
+    const val = half * 2;
+    return { question: `${val} ÷ 2 = ?`, answer: half, operation: "deel", a: half, b: 2 };
+  }
+  // splitsing: a + b = total (total grows from 5 to 20)
+  const total = scale(wl, 5, 20);
+  const a = rnd(1, total - 1);
+  const b = total - a;
+  return { question: `${a} + ${b} = ?`, answer: total, operation: "plus", a, b };
+}
+
+// ─── Groep 5 ─────────────────────────────────────────────────────────────────
+// Optellen/aftrekken t/m 100, alle tafels 1-10 en deeltafels
+
+function makeG5Plus(wl: number): Question {
+  // wl=1: result up to 20, wl=20: result up to 100
+  const maxResult = scale(wl, 20, 100);
+  const a = rnd(1, maxResult - 1);
+  const b = rnd(1, maxResult - a);
+  return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
+}
+
+function makeG5Min(wl: number): Question {
+  // wl=1: a up to 20, wl=20: a up to 100; result ≥ 1
+  const maxA = scale(wl, 20, 100);
+  const a = rnd(2, maxA);
+  const b = rnd(1, a - 1);
+  return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
+}
+
 function makeG5Tafel(wl: number): Question {
-  const maxTafel = scale(wl, 2, 10);
-  const b = rnd(1, maxTafel);
+  // Progressive: start with tafels 2-4, grow to 2-10
+  const maxB = scale(wl, 4, 10);
+  const b = rnd(2, maxB);
   const a = rnd(1, 10);
   return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
 }
 
 function makeG5Deel(wl: number): Question {
-  const maxTafel = scale(wl, 2, 10);
-  const b = rnd(1, maxTafel);
+  // Same progression as multiplication
+  const maxB = scale(wl, 4, 10);
+  const b = rnd(2, maxB);
   const a = rnd(1, 10);
   return { question: `${a * b} ÷ ${b} = ?`, answer: a, operation: "deel", a, b };
 }
 
-// ─── Groep 6 ──────────────────────────────────────────────────────────────────
+// ─── Groep 6 ─────────────────────────────────────────────────────────────────
+// Tafels automatiseren (snel), hogere tafels, optellen/aftrekken t/m 100
 
 const HOGERE_TAFELS = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
 
 function makeG6Tafel(wl: number): Question {
+  // All tables 1-10 × 1-10, practised at speed
   const a = rnd(1, 10);
   const b = rnd(1, 10);
   return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
@@ -234,6 +266,7 @@ function makeG6Deel(wl: number): Question {
 }
 
 function makeG6Hogere(wl: number): Question {
+  // Multiples of 10, 15, 20 ... 100; grow the range as wl increases
   const maxIdx = scale(wl, 2, HOGERE_TAFELS.length - 1);
   const factor = HOGERE_TAFELS[rnd(0, maxIdx)];
   const a = rnd(2, 9);
@@ -244,22 +277,26 @@ function makeG6Hogere(wl: number): Question {
 }
 
 function makeG6Plus(wl: number): Question {
-  const maxResult = scale(wl, 12, 50);
+  // wl=1: result up to 30, wl=20: result up to 100 (harder than grade 5 due to speed)
+  const maxResult = scale(wl, 30, 100);
   const a = rnd(5, maxResult - 5);
-  const b = rnd(3, Math.max(3, maxResult - a));
+  const b = rnd(3, maxResult - a);
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG6Min(wl: number): Question {
-  const maxA = scale(wl, 20, 99);
-  const a = rnd(15, maxA);
-  const b = rnd(3, Math.min(a - 1, scale(wl, 10, 40)));
+  // wl=1: a up to 30, wl=20: a up to 100
+  const maxA = scale(wl, 30, 100);
+  const a = rnd(10, maxA);
+  const b = rnd(3, a - 3);
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
-// ─── Groep 7 ──────────────────────────────────────────────────────────────────
+// ─── Groep 7 ─────────────────────────────────────────────────────────────────
+// Hogere tafels snel (3s→2s), optellen/aftrekken t/m 1000
 
 function makeG7TafelHoog(wl: number): Question {
+  // Higher multiples at speed (time limit 3s→2s)
   const maxIdx = scale(wl, 3, HOGERE_TAFELS.length - 1);
   const factor = HOGERE_TAFELS[rnd(0, maxIdx)];
   const a = rnd(2, 9);
@@ -274,20 +311,26 @@ function makeG7DeelHoog(wl: number): Question {
 }
 
 function makeG7Plus(wl: number): Question {
-  const maxResult = scale(wl, 30, 100);
-  const a = rnd(10, maxResult - 10);
-  const b = rnd(5, Math.max(5, maxResult - a));
+  // wl=1: result up to 200, wl=20: result up to 1000
+  const maxResult = scale(wl, 200, 1000);
+  // Use round numbers more at lower wl
+  const step = wl <= 7 ? 100 : wl <= 14 ? 10 : 1;
+  const a = Math.round(rnd(10, maxResult - 10) / step) * step;
+  const b = Math.round(rnd(5, Math.max(5, maxResult - a)) / step) * step;
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG7Min(wl: number): Question {
-  const maxA = scale(wl, 30, 200);
-  const a = rnd(20, maxA);
-  const b = rnd(5, Math.min(a - 1, scale(wl, 20, 60)));
+  // wl=1: a up to 300, wl=20: a up to 1000
+  const maxA = scale(wl, 300, 1000);
+  const step = wl <= 7 ? 100 : wl <= 14 ? 10 : 1;
+  const a = Math.round(rnd(100, maxA) / step) * step;
+  const b = Math.round(rnd(10, Math.max(10, a - 10)) / step) * step;
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
-// ─── Groep 8 ──────────────────────────────────────────────────────────────────
+// ─── Groep 8 ─────────────────────────────────────────────────────────────────
+// Optellen/aftrekken t/m 10.000, procenten
 
 const PCT_BASIS  = [10, 25, 50];
 const PCT_MEER   = [10, 15, 20, 25, 50, 75];
@@ -295,18 +338,20 @@ const PCT_BASES  = [100, 200, 300, 400, 500, 80, 120, 150, 250, 60, 40, 1000];
 const PCT_BASES2 = [100, 200, 150, 80, 60, 120, 250, 400, 500, 1000];
 
 function makeG8Plus(wl: number): Question {
-  const step = wl < 10 ? 10 : 25;
-  const maxVal = scale(wl, 100, 1000);
-  const a = Math.round(rnd(10, maxVal - 10) / step) * step;
-  const b = Math.round(rnd(10, Math.max(10, maxVal - a)) / step) * step;
+  // wl=1: result up to 2000, wl=20: result up to 10000
+  const maxResult = scale(wl, 2000, 10000);
+  const step = wl <= 7 ? 1000 : wl <= 14 ? 100 : 25;
+  const a = Math.round(rnd(100, maxResult - 100) / step) * step;
+  const b = Math.round(rnd(50, Math.max(50, maxResult - a)) / step) * step;
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG8Min(wl: number): Question {
-  const step = wl < 10 ? 10 : 25;
-  const maxA = scale(wl, 200, 1000);
-  const a = Math.round(rnd(100, maxA) / step) * step;
-  const b = Math.round(rnd(10, Math.max(10, a - 10)) / step) * step;
+  // wl=1: a up to 2000, wl=20: a up to 10000
+  const maxA = scale(wl, 2000, 10000);
+  const step = wl <= 7 ? 1000 : wl <= 14 ? 100 : 25;
+  const a = Math.round(rnd(500, maxA) / step) * step;
+  const b = Math.round(rnd(50, Math.max(50, a - 50)) / step) * step;
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
@@ -343,26 +388,26 @@ function makeForStage(stage: Stage, wl: number): Question {
     case "g5_deeltafels":   return makeG5Deel(wl);
     case "g5_tafels_alles": return Math.random() < 0.5 ? makeG5Tafel(wl) : makeG5Deel(wl);
     // Groep 6
-    case "g6_tafels":    return makeG6Tafel(wl);
-    case "g6_deeltafels":return makeG6Deel(wl);
-    case "g6_hogere":    return makeG6Hogere(wl);
-    case "g6_plus":      return makeG6Plus(wl);
-    case "g6_min":       return makeG6Min(wl);
-    case "g6_alles":     return pickFrom([makeG6Tafel, makeG6Deel, makeG6Hogere, makeG6Plus, makeG6Min])(wl);
+    case "g6_tafels":     return makeG6Tafel(wl);
+    case "g6_deeltafels": return makeG6Deel(wl);
+    case "g6_hogere":     return makeG6Hogere(wl);
+    case "g6_plus":       return makeG6Plus(wl);
+    case "g6_min":        return makeG6Min(wl);
+    case "g6_alles":      return pickFrom([makeG6Tafel, makeG6Deel, makeG6Hogere, makeG6Plus, makeG6Min])(wl);
     // Groep 7
-    case "g7_tafels":    return makeG7TafelHoog(wl);
-    case "g7_deeltafels":return makeG7DeelHoog(wl);
-    case "g7_plus":      return makeG7Plus(wl);
-    case "g7_min":       return makeG7Min(wl);
-    case "g7_plus_min":  return Math.random() < 0.5 ? makeG7Plus(wl) : makeG7Min(wl);
-    case "g7_alles":     return pickFrom([makeG7TafelHoog, makeG7DeelHoog, makeG7Plus, makeG7Min])(wl);
+    case "g7_tafels":     return makeG7TafelHoog(wl);
+    case "g7_deeltafels": return makeG7DeelHoog(wl);
+    case "g7_plus":       return makeG7Plus(wl);
+    case "g7_min":        return makeG7Min(wl);
+    case "g7_plus_min":   return Math.random() < 0.5 ? makeG7Plus(wl) : makeG7Min(wl);
+    case "g7_alles":      return pickFrom([makeG7TafelHoog, makeG7DeelHoog, makeG7Plus, makeG7Min])(wl);
     // Groep 8
-    case "g8_plus":      return makeG8Plus(wl);
-    case "g8_min":       return makeG8Min(wl);
-    case "g8_pct_basis": return makeG8PctBasis(wl);
-    case "g8_pct_meer":  return makeG8PctMeer(wl);
-    case "g8_plus_min":  return Math.random() < 0.5 ? makeG8Plus(wl) : makeG8Min(wl);
-    case "g8_alles":     return pickFrom([makeG8Plus, makeG8Min, makeG8PctBasis, makeG8PctMeer])(wl);
+    case "g8_plus":       return makeG8Plus(wl);
+    case "g8_min":        return makeG8Min(wl);
+    case "g8_pct_basis":  return makeG8PctBasis(wl);
+    case "g8_pct_meer":   return makeG8PctMeer(wl);
+    case "g8_plus_min":   return Math.random() < 0.5 ? makeG8Plus(wl) : makeG8Min(wl);
+    case "g8_alles":      return pickFrom([makeG8Plus, makeG8Min, makeG8PctBasis, makeG8PctMeer])(wl);
   }
 }
 

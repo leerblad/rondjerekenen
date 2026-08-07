@@ -24,6 +24,7 @@ type Row = {
   level: number;
   currentOperation: string;
   doneToday: boolean;
+  busyToday: boolean;
   streak: number;
 };
 
@@ -352,6 +353,10 @@ export default function Portal() {
                   {r.doneToday ? (
                     <span className="rounded-full bg-green/15 px-2 py-1 text-xs font-semibold text-green">
                       Klaar
+                    </span>
+                  ) : r.busyToday ? (
+                    <span className="rounded-full bg-yellow/30 px-2 py-1 text-xs font-semibold text-dark">
+                      Bezig
                     </span>
                   ) : (
                     <span className="rounded-full bg-coral/15 px-2 py-1 text-xs font-semibold text-coral">
