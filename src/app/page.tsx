@@ -127,17 +127,24 @@ export default function Home() {
 
       {/* Bijdrage */}
       <section className="mx-auto max-w-5xl px-6 pb-16 sm:px-10">
-        <div className="rounded-3xl bg-white p-8 shadow-sm text-center">
-          <h2 className="text-xl font-extrabold">Rondje Rekenen is gratis</h2>
-          <p className="mt-3 max-w-xl mx-auto text-sm leading-relaxed text-dark/60">
-            Rondje Rekenen is volledig gratis te gebruiken. Toch brengt het runnen van deze website kosten met zich mee, zoals hosting en verdere ontwikkeling. Om dit mogelijk te houden vragen we scholen en ouders die dat willen een vrijwillige bijdrage te doen via Tikkie.
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-3">
-            {/* QR code placeholder — vervang door echte Tikkie QR */}
-            <div className="flex h-36 w-36 items-center justify-center rounded-2xl bg-cream text-dark/30 text-xs">
-              QR code<br />volgt
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-10">
+            {/* Tekst links */}
+            <div className="flex-1">
+              <h2 className="text-xl font-extrabold">Rondje Rekenen is gratis</h2>
+              <p className="mt-3 text-sm leading-relaxed text-dark/60">
+                Rondje Rekenen is en blijft volledig gratis. Hosting en doorontwikkeling brengen wel kosten met zich mee. Wil je een steentje bijdragen? Dat stellen we zeer op prijs — maar het is en blijft jouw keuze.
+              </p>
+              <p className="mt-3 text-xs text-dark/40">Scan de QR-code om een vrijwillige bijdrage te doen via Tikkie.</p>
             </div>
-            <p className="text-xs text-dark/40">Scan om een bijdrage te doen via Tikkie</p>
+            {/* QR rechts */}
+            <div className="flex flex-col items-center gap-2 shrink-0">
+              {/* Vervang onderstaande div door een <Image> met de echte Tikkie QR */}
+              <div className="flex h-36 w-36 items-center justify-center rounded-2xl bg-cream text-center text-xs text-dark/30">
+                QR code<br />volgt
+              </div>
+              <span className="text-xs text-dark/30">Tikkie</span>
+            </div>
           </div>
         </div>
       </section>
