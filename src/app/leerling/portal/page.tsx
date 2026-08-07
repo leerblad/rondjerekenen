@@ -17,7 +17,7 @@ import {
   levelToGrade,
   GRADE_STAGES,
   withinGradeLevel,
-  LEVELS_PER_GRADE,
+  levelsInGrade,
 } from "@/lib/math";
 
 const BONUS_COST = 20;
@@ -189,9 +189,9 @@ export default function StudentPortal() {
           <h2 className="text-xl font-extrabold">Groep {grade}{level >= MAX_LEVEL && " 🏆"}</h2>
           <span className="text-sm text-dark/50">{STAGE_LABELS[stage]} — {wl}/20</span>
         </div>
-        <p className="mt-1 text-xs text-dark/40">Level {wlInGrade} van {LEVELS_PER_GRADE} in groep {grade}</p>
+        <p className="mt-1 text-xs text-dark/40">Level {wlInGrade} van {levelsInGrade(grade)} in groep {grade}</p>
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-cream">
-          <div className="h-3 rounded-full bg-purple transition-all" style={{ width: `${((wlInGrade - 1) / LEVELS_PER_GRADE) * 100}%` }} />
+          <div className="h-3 rounded-full bg-purple transition-all" style={{ width: `${((wlInGrade - 1) / levelsInGrade(grade)) * 100}%` }} />
         </div>
         {student.streak > 0 && (
           <p className="mt-3 text-center text-sm font-semibold text-coral">

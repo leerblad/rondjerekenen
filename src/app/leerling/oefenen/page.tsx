@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import {
   generateQuestion,
+  generateBonusQuestion,
   getTimeLimit,
   levelToStage,
   STAGE_LABELS,
@@ -209,7 +210,7 @@ function OefelenInner() {
     clearQTimer();
     if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
 
-    const q = generateQuestion(lvl, pool);
+    const q = isBonus ? generateBonusQuestion(lvl, pool) : generateQuestion(lvl, pool);
     questionRef.current = q;
     setQuestion(q);
     setQIndex(recorded.length);

@@ -12,33 +12,33 @@ export const OPERATION_SYMBOLS: Record<Operation, string> = {
 // ─── Stages: 30 blocks × 20 levels = 600 total ───────────────────────────────
 
 export type Stage =
-  // Groep 4 (levels 1-120)
+  // Groep 4 (levels 1-120, 6 blocks)
   | "g4_plus" | "g4_min" | "g4_plus_min" | "g4_tafels" | "g4_halveren" | "g4_alles"
-  // Groep 5 (levels 121-240)
-  | "g5_plus" | "g5_min" | "g5_plus_min" | "g5_tafels" | "g5_deeltafels" | "g5_tafels_alles"
-  // Groep 6 (levels 241-360)
+  // Groep 5 (levels 121-260, 7 blocks)
+  | "g5_plus" | "g5_min" | "g5_plus_min" | "g5_tafels" | "g5_deeltafels" | "g5_tafels_alles" | "g5_alles"
+  // Groep 6 (levels 261-380, 6 blocks)
   | "g6_tafels" | "g6_deeltafels" | "g6_hogere" | "g6_plus" | "g6_min" | "g6_alles"
-  // Groep 7 (levels 361-480)
+  // Groep 7 (levels 381-500, 6 blocks)
   | "g7_tafels" | "g7_deeltafels" | "g7_plus" | "g7_min" | "g7_plus_min" | "g7_alles"
-  // Groep 8 (levels 481-600)
+  // Groep 8 (levels 501-620, 6 blocks)
   | "g8_plus" | "g8_min" | "g8_pct_basis" | "g8_pct_meer" | "g8_plus_min" | "g8_alles";
 
 export const STAGES: Stage[] = [
-  // Groep 4
+  // Groep 4 (6 blocks, levels 1-120)
   "g4_plus", "g4_min", "g4_plus_min", "g4_tafels", "g4_halveren", "g4_alles",
-  // Groep 5
-  "g5_plus", "g5_min", "g5_plus_min", "g5_tafels", "g5_deeltafels", "g5_tafels_alles",
-  // Groep 6
+  // Groep 5 (7 blocks, levels 121-260)
+  "g5_plus", "g5_min", "g5_plus_min", "g5_tafels", "g5_deeltafels", "g5_tafels_alles", "g5_alles",
+  // Groep 6 (6 blocks, levels 261-380)
   "g6_tafels", "g6_deeltafels", "g6_hogere", "g6_plus", "g6_min", "g6_alles",
-  // Groep 7
+  // Groep 7 (6 blocks, levels 381-500)
   "g7_tafels", "g7_deeltafels", "g7_plus", "g7_min", "g7_plus_min", "g7_alles",
-  // Groep 8
+  // Groep 8 (6 blocks, levels 501-620)
   "g8_plus", "g8_min", "g8_pct_basis", "g8_pct_meer", "g8_plus_min", "g8_alles",
 ];
 
 export const STAGE_LABELS: Record<Stage, string> = {
   // Groep 4
-  g4_plus:      "Optellen t/m 20",
+  g4_plus: "Optellen t/m 20",
   g4_min:       "Aftrekken t/m 20",
   g4_plus_min:  "Optellen & aftrekken t/m 20",
   g4_tafels:    "Tafels 2, 5 en 10",
@@ -51,6 +51,7 @@ export const STAGE_LABELS: Record<Stage, string> = {
   g5_tafels:       "Alle tafels (1-10)",
   g5_deeltafels:   "Alle deeltafels (1-10)",
   g5_tafels_alles: "Tafels & deeltafels",
+  g5_alles:        "Alles groep 5",
   // Groep 6
   g6_tafels:    "Tafels snel",
   g6_deeltafels:"Deeltafels snel",
@@ -80,22 +81,28 @@ export type Grade = 4 | 5 | 6 | 7 | 8;
 
 export const GRADE_STAGES: Record<Grade, Stage[]> = {
   4: ["g4_plus", "g4_min", "g4_plus_min", "g4_tafels", "g4_halveren", "g4_alles"],
-  5: ["g5_plus", "g5_min", "g5_plus_min", "g5_tafels", "g5_deeltafels", "g5_tafels_alles"],
+  5: ["g5_plus", "g5_min", "g5_plus_min", "g5_tafels", "g5_deeltafels", "g5_tafels_alles", "g5_alles"],
   6: ["g6_tafels", "g6_deeltafels", "g6_hogere", "g6_plus", "g6_min", "g6_alles"],
   7: ["g7_tafels", "g7_deeltafels", "g7_plus", "g7_min", "g7_plus_min", "g7_alles"],
   8: ["g8_plus", "g8_min", "g8_pct_basis", "g8_pct_meer", "g8_plus_min", "g8_alles"],
 };
 
+// Grade 5 has 7 blocks (140 levels); all others have 6 blocks (120 levels)
 export const GRADE_START_LEVEL: Record<Grade, number> = {
-  4: 1, 5: 121, 6: 241, 7: 361, 8: 481,
+  4: 1, 5: 121, 6: 261, 7: 381, 8: 501,
 };
 
 export function levelToGrade(level: number): Grade {
   if (level <= 120) return 4;
-  if (level <= 240) return 5;
-  if (level <= 360) return 6;
-  if (level <= 480) return 7;
+  if (level <= 260) return 5;
+  if (level <= 380) return 6;
+  if (level <= 500) return 7;
   return 8;
+}
+
+/** How many levels are in the given grade */
+export function levelsInGrade(grade: Grade): number {
+  return GRADE_STAGES[grade].length * LEVELS_PER_STAGE;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -387,6 +394,7 @@ function makeForStage(stage: Stage, wl: number): Question {
     case "g5_tafels":       return makeG5Tafel(wl);
     case "g5_deeltafels":   return makeG5Deel(wl);
     case "g5_tafels_alles": return Math.random() < 0.5 ? makeG5Tafel(wl) : makeG5Deel(wl);
+    case "g5_alles":        return pickFrom([makeG5Plus, makeG5Min, makeG5Tafel, makeG5Deel])(wl);
     // Groep 6
     case "g6_tafels":     return makeG6Tafel(wl);
     case "g6_deeltafels": return makeG6Deel(wl);
@@ -417,6 +425,42 @@ export function generateQuestion(level: number, retryPool: Question[] = []): Que
   }
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
+  return makeForStage(stage, wl);
+}
+
+/**
+ * For bonus sessions: draw from ALL stages the student has reached,
+ * weighted heavily toward recent stages (last ~3 blocks) so it stays relevant.
+ * Earlier stages use wl=20 (hardest) since the student has already mastered them.
+ */
+export function generateBonusQuestion(currentLevel: number, retryPool: Question[] = []): Question {
+  if (retryPool.length > 0 && Math.random() < 0.70) {
+    return retryPool[Math.floor(Math.random() * retryPool.length)];
+  }
+
+  const currentStageIdx = Math.min(
+    Math.floor((Math.max(1, currentLevel) - 1) / LEVELS_PER_STAGE),
+    STAGES.length - 1
+  );
+
+  // Weight: current stage = 5, previous 2 stages = 3, previous 3-6 = 2, older = 1
+  const weights: number[] = [];
+  for (let i = 0; i <= currentStageIdx; i++) {
+    const dist = currentStageIdx - i;
+    weights.push(dist === 0 ? 5 : dist <= 2 ? 3 : dist <= 5 ? 2 : 1);
+  }
+
+  const totalWeight = weights.reduce((s, w) => s + w, 0);
+  let r = Math.random() * totalWeight;
+  let pickedIdx = currentStageIdx; // fallback
+  for (let i = 0; i <= currentStageIdx; i++) {
+    r -= weights[i];
+    if (r <= 0) { pickedIdx = i; break; }
+  }
+
+  const stage = STAGES[pickedIdx];
+  // Use wl=20 for older stages (they should be fast), current stage uses its natural wl
+  const wl = pickedIdx === currentStageIdx ? withinStageLevel(currentLevel) : 20;
   return makeForStage(stage, wl);
 }
 
