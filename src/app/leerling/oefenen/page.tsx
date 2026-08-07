@@ -154,6 +154,7 @@ function OefelenInner() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const startedRef = useRef(false);
   const finishingRef = useRef(false);
+  const timeUpRef = useRef(false); // soft timer: finish current level before stopping
 
   useEffect(() => {
     if (ready && !student) router.replace("/leerling");
@@ -244,14 +245,31 @@ function OefelenInner() {
     retryPoolRef.current = wrong;
     setRetryPool(wrong);
 
-    // If bonus or total time is up → go straight to done
-    const secsLeft = isBonus ? 0 : Math.max(0, SESSION_SECONDS - Math.floor((Date.now() - sessionStartRef.current) / 1000));
-    if (isBonus || secsLeft <= 5) {
-      setPhase("done");
-    } else {
-      setPhase("level-result");
+    // Bonus: always done after one level
+    if (isBonus) { setPhase("done"); return; }
+
+    // Time is up → done (finish current level was already natural)
+    if (timeUpRef.current) { setPhase("done"); return; }
+
+    // Passed and time remains → auto-advance to next level after brief pause
+    if (passed && newLevel > lvl && newLevel <= MAX_LEVEL) {
+      setPhase("level-result"); // briefly show result
+      setTimeout(() => {
+        if (timeUpRef.current) { setPhase("done"); return; }
+        currentLevelRef.current = newLevel;
+        setCurrentLevel(newLevel);
+        answersRef.current = [];
+        retryPoolRef.current = [];
+        setRetryPool([]);
+        setPhase("playing");
+        startQuestion([], newLevel, []);
+      }, 2000); // 2s to show the result, then auto-continue
+      return;
     }
-  }, [student, isBonus, updateStudent]);
+
+    // Failed or max level reached → show result screen
+    setPhase("level-result");
+  }, [student, isBonus, updateStudent, startQuestion]);
 
   // ── Start a single question ────────────────────────────────────────────────
   const startQuestion = useCallback((recorded: RecordedAnswer[], lvl: number, pool: Question[]) => {
@@ -329,6 +347,14 @@ function OefelenInner() {
     answersRef.current = [...answersRef.current, rec];
     setFlash(isCorrect ? "green" : "red");
 
+    // If answered correctly, remove from retry pool so it won't keep returning
+    if (isCorrect) {
+      retryPoolRef.current = retryPoolRef.current.filter(
+        (rq) => !(rq.a === q.a && rq.b === q.b && rq.operation === q.operation)
+      );
+      setRetryPool(retryPoolRef.current);
+    }
+
     setTimeout(() => {
       const next = answersRef.current;
       if (next.length >= QUESTIONS_PER_LEVEL) {
@@ -346,6 +372,7 @@ function OefelenInner() {
     setCurrentLevel(lvl);
     answersRef.current = [];
     retryPoolRef.current = [];
+    timeUpRef.current = false;
     sessionStartRef.current = Date.now();
     setPhase("playing");
 
@@ -354,10 +381,10 @@ function OefelenInner() {
       totalTimerRef.current = setInterval(() => {
         const secs = Math.max(0, SESSION_SECONDS - Math.floor((Date.now() - sessionStartRef.current) / 1000));
         setTotalSecsLeft(secs);
-        if (secs <= 0) {
+        if (secs <= 0 && !timeUpRef.current) {
+          timeUpRef.current = true;
           clearTotalTimer();
-          clearQTimer();
-          finishLevel(answersRef.current, currentLevelRef.current);
+          // Don't cut off mid-level — let the current level finish naturally
         }
       }, 500);
     }
@@ -550,12 +577,17 @@ function OefelenInner() {
   if (phase === "done") {
     const totalCorrect = levelsCompleted.reduce((s, r) => s + r.correct, 0);
     const totalAnswered = levelsCompleted.reduce((s, r) => s + r.total, 0);
+    const levelsPassed = levelsCompleted.filter((r) => r.passed).length;
+    const BONUS_COST = 20;
+    const canBonus = (student?.coins ?? 0) >= BONUS_COST;
 
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
         <div className="w-full rounded-3xl bg-white p-10 shadow-sm">
           <p className="text-4xl mb-2">🎉</p>
-          <h1 className="text-2xl font-extrabold">Je bent klaar voor vandaag!</h1>
+          <h1 className="text-2xl font-extrabold">
+            {isBonus ? "Bonus sessie klaar!" : "Je bent klaar voor vandaag!"}
+          </h1>
 
           {totalAnswered > 0 && (
             <p className="mt-3 text-dark/60">
@@ -569,8 +601,8 @@ function OefelenInner() {
             </p>
           )}
 
-          {levelsCompleted.length > 1 && (
-            <div className="mt-6 text-left">
+          {levelsCompleted.length > 0 && (
+            <div className="mt-4 text-left">
               <p className="mb-2 text-sm font-semibold text-dark/60">Per level:</p>
               {levelsCompleted.map((r, i) => (
                 <div key={i} className="flex justify-between border-t border-black/5 py-2 text-sm">
@@ -583,12 +615,29 @@ function OefelenInner() {
             </div>
           )}
 
-          <Link
-            href="/leerling/portal"
-            className="mt-8 block w-full rounded-full bg-coral py-3 font-bold text-white transition hover:opacity-90"
-          >
-            Terug naar huis
-          </Link>
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              href="/leerling/portal"
+              className="block w-full rounded-full bg-coral py-3 font-bold text-white transition hover:opacity-90"
+            >
+              Terug naar huis
+            </Link>
+            <Link
+              href="/leerling/winkel"
+              className="block w-full rounded-full bg-yellow/30 py-3 font-semibold text-dark transition hover:opacity-80"
+            >
+              🛒 Naar de winkel
+            </Link>
+            {!isBonus && (
+              <Link
+                href={canBonus ? "/leerling/oefenen?bonus=1" : "#"}
+                className={`block w-full rounded-full py-3 font-semibold transition ${canBonus ? "bg-purple text-white hover:opacity-90" : "bg-cream text-dark/30 cursor-not-allowed"}`}
+                onClick={canBonus ? undefined : (e) => e.preventDefault()}
+              >
+                ⚡ Extra sessie {canBonus ? `(${BONUS_COST} munten)` : `(${BONUS_COST - (student?.coins ?? 0)} munten te kort)`}
+              </Link>
+            )}
+          </div>
         </div>
       </main>
     );
