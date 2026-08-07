@@ -206,17 +206,17 @@ function makeG4Tafel(wl: number): Question {
 
 function makeG4Halveren(wl: number): Question {
   if (Math.random() < 0.6) {
-    // halveren: halve of an even number
-    const maxHalf = scale(wl, 2, 10);
-    const half = rnd(1, maxHalf);
-    const val = half * 2;
-    return { question: `${val} ÷ 2 = ?`, answer: half, operation: "deel", a: half, b: 2 };
+    // halveren: "Halveer 12" → 6  (only even numbers, range grows with wl)
+    const maxHalf = scale(wl, 3, 10); // half value 3-10 → full value 6-20
+    const half = rnd(2, maxHalf);
+    const val = half * 2; // always even, minimum 4
+    return { question: `Halveer ${val}`, answer: half, operation: "deel", a: val, b: 2 };
   }
-  // splitsing: a + b = total (total grows from 5 to 20)
+  // splitsing: "5 + ? = 8" — what goes with 5 to make the total?
   const total = scale(wl, 5, 20);
   const a = rnd(1, total - 1);
   const b = total - a;
-  return { question: `${a} + ${b} = ?`, answer: total, operation: "plus", a, b };
+  return { question: `${a} + ? = ${total}`, answer: b, operation: "plus", a, b };
 }
 
 // ─── Groep 5 ─────────────────────────────────────────────────────────────────
