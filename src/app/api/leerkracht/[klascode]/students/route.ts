@@ -8,10 +8,13 @@ export async function GET(
   const { klascode } = await params;
   const code = klascode.toUpperCase();
   const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
   const { data: students } = await supabaseAdmin
     .from("students")
-    .select("id, nickname, grade, coins, level, current_operation")
+    .select("id, nickname, grade, coins, level, current_operation, streak, streak_protected_until")
     .eq("class_code", code)
     .order("nickname");
 
@@ -33,23 +36,31 @@ export async function GET(
       const doneToday = totalQuestionsToday >= 20;
       const busyToday = !doneToday && totalQuestionsToday > 0;
 
-      // streak of consecutive days ending today/yesterday
+      // Dynamic streak: only count if played today or yesterday
       const days = Array.from(
         new Set((sessions || []).map((x) => x.date))
       ).sort((a, b) => (a < b ? 1 : -1));
-      let streak = 0;
-      const cursor = new Date(today);
-      // allow streak to count from today or yesterday
-      if (days[0] && days[0] !== today) cursor.setDate(cursor.getDate() - 1);
-      for (const d of days) {
-        const want = cursor.toISOString().slice(0, 10);
-        if (d === want) {
-          streak++;
-          cursor.setDate(cursor.getDate() - 1);
-        } else if (d < want) {
-          break;
+
+      let dynamicStreak = 0;
+      const mostRecent = days[0] ?? "";
+      if (mostRecent === today || mostRecent === yesterdayStr) {
+        const cursor = new Date(mostRecent);
+        for (const d of days) {
+          const want = cursor.toISOString().slice(0, 10);
+          if (d === want) {
+            dynamicStreak++;
+            cursor.setDate(cursor.getDate() - 1);
+          } else if (d < want) {
+            break;
+          }
         }
       }
+
+      // If the teacher restored the streak (streak_protected_until >= yesterday),
+      // use the stored DB streak instead of the dynamic one
+      const protectedUntil = s.streak_protected_until ?? "";
+      const teacherRestored = protectedUntil >= yesterdayStr;
+      const streak = teacherRestored ? Math.max(dynamicStreak, s.streak ?? 0) : dynamicStreak;
 
       return {
         id: s.id,

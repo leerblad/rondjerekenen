@@ -502,6 +502,34 @@ export default function Portal() {
               );
             })()}
 
+            {/* Reeks herstellen */}
+            <div className="mt-4 rounded-2xl border border-black/10 p-4">
+              <p className="text-sm font-semibold mb-1">Reeks</p>
+              <p className="text-xs text-dark/50 mb-3">
+                Herstel de reeks van deze leerling als ze ziek waren of vakantie hadden.
+              </p>
+              <button
+                onClick={async () => {
+                  const res = await fetch("/api/leerkracht/herstel-reeks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: selected.id }),
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    setRows((r) => r.map((x) => x.id === selected.id ? { ...x, streak: data.streak } : x));
+                    setSelected((s) => s ? { ...s, streak: data.streak } : s);
+                    alert(`Reeks hersteld naar ${data.streak} dagen 🔥`);
+                  } else {
+                    alert(data.error || "Mislukt.");
+                  }
+                }}
+                className="rounded-full border border-green px-4 py-2 text-sm font-semibold text-green transition hover:bg-green hover:text-white"
+              >
+                🔁 Herstel reeks
+              </button>
+            </div>
+
             {/* Wachtwoord resetten */}
             <div className="mt-4 rounded-2xl border border-black/10 p-4">
               <p className="text-sm font-semibold mb-2">Wachtwoord</p>

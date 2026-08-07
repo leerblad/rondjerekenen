@@ -42,6 +42,24 @@ export default function StudentPortal() {
     if (student && !student.avatarUrl) setPickingAvatar(true);
   }, [student]);
 
+  // Fetch fresh data from DB on load (picks up teacher changes to level/streak)
+  useEffect(() => {
+    if (!student) return;
+    fetch(`/api/leerling/mijn-data?studentId=${student.id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.level !== undefined) {
+          updateStudent({
+            level: d.level,
+            coins: d.coins,
+            streak: d.streak,
+            streakLost: d.streakLost,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [student?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Check if already played today
   useEffect(() => {
     if (!student) return;
@@ -49,7 +67,7 @@ export default function StudentPortal() {
     fetch(`/api/leerling/speelde-vandaag?studentId=${student.id}&date=${today}`)
       .then((r) => r.json())
       .then((d) => setPlayedToday(!!d.played));
-  }, [student]);
+  }, [student?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function saveAvatar() {
     if (!student) return;
