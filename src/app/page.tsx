@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { LevelOverzichtKnop } from "@/components/LevelOverzichtModal";
 
 export default function Home() {
   return (
@@ -31,7 +32,7 @@ export default function Home() {
               <span className="text-coral">Klaar in 10 minuten.</span>
             </h1>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/60">
-              Dé tool voor het automatiseren van rekenen. Leerlingen oefenen dagelijks op eigen niveau en verdienen munten, bouwen een reeks op en klimmen door 140 levels.
+              Dé tool voor het automatiseren van rekenen. Leerlingen oefenen dagelijks op eigen niveau en verdienen munten, bouwen een reeks op en klimmen door 600 levels.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
@@ -50,6 +51,11 @@ export default function Home() {
           </div>
 
         </div>
+      </section>
+
+      {/* Level overzicht knop */}
+      <section className="mx-auto max-w-5xl px-6 pb-4 sm:px-10 text-center">
+        <LevelOverzichtKnop />
       </section>
 
       {/* Voordelen */}
