@@ -54,7 +54,7 @@ export default function Home() {
       </section>
 
       {/* Level overzicht knop */}
-      <section className="mx-auto max-w-5xl px-6 pb-4 sm:px-10 text-center">
+      <section className="mx-auto max-w-5xl px-6 pb-8 sm:px-10 text-center">
         <LevelOverzichtKnop />
       </section>
 
@@ -75,7 +75,7 @@ export default function Home() {
       </section>
 
       {/* Rolkaarten */}
-      <section className="mx-auto max-w-5xl px-6 pb-20 sm:px-10">
+      <section className="mx-auto max-w-5xl px-6 pb-8 sm:px-10">
         <div className="grid gap-5 sm:grid-cols-2">
 
           {/* Leerkracht */}
@@ -126,7 +126,7 @@ export default function Home() {
       </section>
 
       {/* Bijdrage */}
-      <section className="mx-auto max-w-5xl px-6 pb-16 sm:px-10">
+      <section className="mx-auto max-w-5xl px-6 pb-8 sm:px-10">
         <div className="rounded-3xl bg-white p-8 shadow-sm">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-10">
             {/* Tekst links */}
