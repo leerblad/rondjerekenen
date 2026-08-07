@@ -1,6 +1,8 @@
 "use client";
 
-import { Operation, OPERATIONS } from "@/lib/math";
+import { Operation } from "@/lib/math";
+
+const OPERATIONS: Operation[] = ["plus", "min", "keer", "deel", "pct"];
 import RPMAvatar from "./RPMAvatar";
 
 const HAT_SRC: Record<string, string> = {

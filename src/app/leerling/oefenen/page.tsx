@@ -61,7 +61,7 @@ function MasteryGrid({ answers, level }: { answers: RecordedAnswer[]; level: num
     }
   }
 
-  const isMin = stage === "min" || stage === "plus_min";
+  const isMin = stage.includes("min");
 
   return (
     <div className="overflow-x-auto">
@@ -142,6 +142,9 @@ function OefelenInner() {
   const [consolationCoins, setConsolationCoins] = useState(0);
   const consolationCalledRef = useRef(false);
 
+  // Ref to break circular dependency between startQuestion ↔ finishLevel
+  const finishLevelRef = useRef<(recorded: RecordedAnswer[], lvl: number) => void>(() => {});
+
   const sessionStartRef = useRef<number>(0);
   const questionRef = useRef<Question | null>(null);
   const startRef = useRef<number>(0);
@@ -200,6 +203,58 @@ function OefelenInner() {
     // Restart the per-question timer (give full time again — fair to the student)
     startQ(answersRef.current, currentLevelRef.current, retryPoolRef.current);
   }, []);
+
+  // ── Start a single question ────────────────────────────────────────────────
+  const startQuestion = useCallback((recorded: RecordedAnswer[], lvl: number, pool: Question[]) => {
+    clearQTimer();
+    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+
+    const q = generateQuestion(lvl, pool);
+    questionRef.current = q;
+    setQuestion(q);
+    setQIndex(recorded.length);
+    setFlash(null);
+    setLocked(false);
+    setInputValue("");
+    setQTimePct(100);
+    startRef.current = Date.now();
+    setTimeout(() => inputRef.current?.focus(), 50);
+
+    const timeLimit = isBonus ? BONUS_TIME_LIMIT : getTimeLimit(lvl);
+    const start = Date.now();
+
+    qTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 100 - (elapsed / timeLimit) * 100);
+      setQTimePct(pct);
+      if (elapsed >= timeLimit) {
+        clearQTimer();
+        const curr = questionRef.current;
+        if (!curr) return;
+        const rec: RecordedAnswer = {
+          question: curr.question,
+          correctAnswer: curr.answer,
+          studentAnswer: null,
+          isCorrect: false,
+          isTimeout: true,
+          responseTimeMs: timeLimit,
+          qA: curr.a,
+          qB: curr.b,
+          qOp: curr.operation,
+        };
+        const next = [...answersRef.current, rec];
+        answersRef.current = next;
+        setFlash("red");
+        setTimeout(() => {
+          if (next.length >= QUESTIONS_PER_LEVEL) {
+            finishLevelRef.current(next, currentLevelRef.current);
+          } else {
+            startQuestion(next, currentLevelRef.current, retryPoolRef.current);
+          }
+        }, 700);
+      }
+    }, 50);
+  }, [isBonus]);
 
   // ── Finish one level attempt ───────────────────────────────────────────────
   const finishLevel = useCallback(async (recorded: RecordedAnswer[], lvl: number) => {
@@ -298,58 +353,8 @@ function OefelenInner() {
     setPhase("level-result");
   }, [student, isBonus, updateStudent, startQuestion]);
 
-  // ── Start a single question ────────────────────────────────────────────────
-  const startQuestion = useCallback((recorded: RecordedAnswer[], lvl: number, pool: Question[]) => {
-    clearQTimer();
-    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
-
-    const q = generateQuestion(lvl, pool);
-    questionRef.current = q;
-    setQuestion(q);
-    setQIndex(recorded.length);
-    setFlash(null);
-    setLocked(false);
-    setInputValue("");
-    setQTimePct(100);
-    startRef.current = Date.now();
-    setTimeout(() => inputRef.current?.focus(), 50);
-
-    const timeLimit = isBonus ? BONUS_TIME_LIMIT : getTimeLimit(lvl);
-    const start = Date.now();
-
-    qTimerRef.current = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.max(0, 100 - (elapsed / timeLimit) * 100);
-      setQTimePct(pct);
-      if (elapsed >= timeLimit) {
-        clearQTimer();
-        // Time's up for this question — auto-submit null
-        const curr = questionRef.current;
-        if (!curr) return;
-        const rec: RecordedAnswer = {
-          question: curr.question,
-          correctAnswer: curr.answer,
-          studentAnswer: null,
-          isCorrect: false,
-          isTimeout: true,
-          responseTimeMs: timeLimit,
-          qA: curr.a,
-          qB: curr.b,
-          qOp: curr.operation,
-        };
-        const next = [...answersRef.current, rec];
-        answersRef.current = next;
-        setFlash("red");
-        setTimeout(() => {
-          if (next.length >= QUESTIONS_PER_LEVEL) {
-            finishLevel(next, currentLevelRef.current);
-          } else {
-            startQuestion(next, currentLevelRef.current, retryPoolRef.current);
-          }
-        }, 700);
-      }
-    }, 50);
-  }, [isBonus, finishLevel]);
+  // Keep the ref in sync so startQuestion can call finishLevel without circular deps
+  finishLevelRef.current = finishLevel;
 
   // ── Handle student answer ──────────────────────────────────────────────────
   const handleAnswer = useCallback((choice: number | null) => {
