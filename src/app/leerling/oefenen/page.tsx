@@ -173,6 +173,37 @@ function OefelenInner() {
   const [warmupIndex, setWarmupIndex] = useState(0);
   const [warmupCorrect, setWarmupCorrect] = useState(0);
 
+  // ── Adaptive time limit for grade 8 (non-tafels) ─────────────────────────
+  // Persisted in localStorage; adjusts after each level based on accuracy
+  const ADAPTIVE_MIN = 3000;
+  const ADAPTIVE_MAX = 6000;
+  const ADAPTIVE_STEP = 500;
+
+  const getAdaptiveTime = useCallback((lvl: number): number => {
+    const grade = levelToGrade(lvl);
+    const stage = levelToStage(lvl);
+    // g8_tafels always stays at 2s (speed drill)
+    if (grade !== 8 || stage === "g8_tafels") return getTimeLimit(lvl);
+    try {
+      const stored = localStorage.getItem(`rr_atime_${student?.id}`);
+      return stored ? Math.min(ADAPTIVE_MAX, Math.max(ADAPTIVE_MIN, Number(stored))) : ADAPTIVE_MAX;
+    } catch { return ADAPTIVE_MAX; }
+  }, [student?.id]);
+
+  const adjustAdaptiveTime = useCallback((lvl: number, pct: number) => {
+    const grade = levelToGrade(lvl);
+    const stage = levelToStage(lvl);
+    if (grade !== 8 || stage === "g8_tafels") return;
+    try {
+      const key = `rr_atime_${student?.id}`;
+      const current = Math.min(ADAPTIVE_MAX, Math.max(ADAPTIVE_MIN, Number(localStorage.getItem(key) ?? ADAPTIVE_MAX)));
+      let next = current;
+      if (pct >= 0.85 && current > ADAPTIVE_MIN) next = current - ADAPTIVE_STEP;
+      else if (pct < 0.70 && current < ADAPTIVE_MAX) next = current + ADAPTIVE_STEP;
+      if (next !== current) localStorage.setItem(key, String(next));
+    } catch { /* ignore */ }
+  }, [student?.id]);
+
   // ── Timer visibility preference (stored in localStorage) ─────────────────
   const [hideTimer, setHideTimer] = useState(() => {
     try { return localStorage.getItem("rr_hide_timer") === "1"; } catch { return false; }
@@ -248,7 +279,7 @@ function OefelenInner() {
     startRef.current = Date.now();
     setTimeout(() => inputRef.current?.focus(), 50);
 
-    const timeLimit = isBonus ? BONUS_TIME_LIMIT : getTimeLimit(lvl);
+    const timeLimit = isBonus ? BONUS_TIME_LIMIT : getAdaptiveTime(lvl);
     const start = Date.now();
 
     qTimerRef.current = setInterval(() => {
@@ -295,6 +326,9 @@ function OefelenInner() {
     const total = recorded.length;
     const pct = total > 0 ? correct / total : 0;
     const passed = pct >= UNLOCK_THRESHOLD;
+
+    // Adapt time limit for grade 8 based on this level's performance
+    adjustAdaptiveTime(lvl, pct);
 
     const wrong = recorded
       .filter((a) => !a.isCorrect)
