@@ -7,20 +7,24 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   generateQuestion,
   generateBonusQuestion,
+  generateWarmupQuestion,
   getTimeLimit,
   levelToStage,
+  levelToGrade,
   STAGE_LABELS,
   withinStageLevel,
   UNLOCK_THRESHOLD,
   QUESTIONS_PER_LEVEL,
   SESSION_SECONDS,
   BONUS_TIME_LIMIT,
+  WARMUP_COUNT,
+  WARMUP_TIME_MS,
   MAX_LEVEL,
   Question,
   Operation,
 } from "@/lib/math";
 
-type Phase = "start" | "playing" | "level-result" | "done";
+type Phase = "start" | "warmup" | "playing" | "level-result" | "done";
 
 type RecordedAnswer = {
   question: string;
@@ -162,6 +166,24 @@ function OefelenInner() {
   const pausedMsRef = useRef<number>(0);   // total ms spent paused
   const pausedAtRef = useRef<number | null>(null); // timestamp of current pause start
   const [isPaused, setIsPaused] = useState(false);
+
+  // ── Warm-up state ─────────────────────────────────────────────────────────
+  const warmupCountRef = useRef(0);   // how many warmup questions shown so far
+  const warmupCorrectRef = useRef(0); // how many answered correctly
+  const [warmupIndex, setWarmupIndex] = useState(0);
+  const [warmupCorrect, setWarmupCorrect] = useState(0);
+
+  // ── Timer visibility preference (stored in localStorage) ─────────────────
+  const [hideTimer, setHideTimer] = useState(() => {
+    try { return localStorage.getItem("rr_hide_timer") === "1"; } catch { return false; }
+  });
+  function toggleHideTimer() {
+    setHideTimer((v) => {
+      const next = !v;
+      try { localStorage.setItem("rr_hide_timer", next ? "1" : "0"); } catch { /* ignore */ }
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (ready && !student) router.replace("/leerling");
@@ -403,6 +425,64 @@ function OefelenInner() {
     }, isCorrect ? 300 : 800);
   }, [locked, finishLevel, startQuestion]);
 
+  // ── Warm-up: one question in the warmup phase ─────────────────────────────
+  const startWarmupQuestion = useCallback(() => {
+    clearQTimer();
+    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    const q = generateWarmupQuestion(questionRef.current);
+    questionRef.current = q;
+    setQuestion(q);
+    setFlash(null);
+    setLocked(false);
+    setInputValue("");
+    setQTimePct(100);
+    startRef.current = Date.now();
+    setTimeout(() => inputRef.current?.focus(), 50);
+
+    const start = Date.now();
+    qTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 100 - (elapsed / WARMUP_TIME_MS) * 100);
+      setQTimePct(pct);
+      if (elapsed >= WARMUP_TIME_MS) {
+        clearQTimer();
+        warmupCountRef.current += 1;
+        setWarmupIndex(warmupCountRef.current);
+        setFlash("red");
+        setTimeout(() => {
+          if (warmupCountRef.current >= WARMUP_COUNT) {
+            setPhase("start");
+          } else {
+            startWarmupQuestion();
+          }
+        }, 700);
+      }
+    }, 50);
+  }, []);
+
+  const handleWarmupAnswer = useCallback((choice: number | null) => {
+    const q = questionRef.current;
+    if (!q || locked) return;
+    setLocked(true);
+    clearQTimer();
+    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    const isCorrect = choice !== null && choice === q.answer;
+    if (isCorrect) {
+      warmupCorrectRef.current += 1;
+      setWarmupCorrect(warmupCorrectRef.current);
+    }
+    warmupCountRef.current += 1;
+    setWarmupIndex(warmupCountRef.current);
+    setFlash(isCorrect ? "green" : "red");
+    setTimeout(() => {
+      if (warmupCountRef.current >= WARMUP_COUNT) {
+        setPhase("start");
+      } else {
+        startWarmupQuestion();
+      }
+    }, isCorrect ? 300 : 800);
+  }, [locked, startWarmupQuestion]);
+
   // ── Start session (10-minute timer + first question) ──────────────────────
   const startSession = useCallback(() => {
     const lvl = student?.level ?? 1;
@@ -430,6 +510,26 @@ function OefelenInner() {
 
     startQuestion([], lvl, []);
   }, [student, isBonus, startQuestion, finishLevel]);
+
+  // ── Check and launch warm-up (grades 5-8, once per day, not bonus) ─────────
+  const launchWithWarmup = useCallback(() => {
+    if (isBonus || !student) { startSession(); return; }
+    const grade = levelToGrade(student.level ?? 1);
+    if (grade < 5) { startSession(); return; }
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `rr_warmup_${student.id}_${today}`;
+    if (typeof window !== "undefined" && localStorage.getItem(key)) {
+      startSession(); return;
+    }
+    // Mark done for today
+    try { localStorage.setItem(key, "1"); } catch { /* ignore */ }
+    warmupCountRef.current = 0;
+    warmupCorrectRef.current = 0;
+    setWarmupIndex(0);
+    setWarmupCorrect(0);
+    setPhase("warmup");
+    startWarmupQuestion();
+  }, [isBonus, student, startSession, startWarmupQuestion]);
 
   // Auto-start for bonus (skip start screen)
   useEffect(() => {
@@ -514,23 +614,95 @@ function OefelenInner() {
 
   // ── Start screen ───────────────────────────────────────────────────────────
   if (phase === "start") {
+    const warmupDone = warmupIndex >= WARMUP_COUNT;
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
-        <div className="rounded-3xl bg-white p-10 shadow-sm">
-          <p className="text-5xl mb-4">📚</p>
+        <div className="rounded-3xl bg-white p-10 shadow-sm w-full">
+          {warmupDone && (
+            <div className="mb-6 rounded-2xl bg-green/10 px-4 py-3 text-green font-semibold text-sm">
+              Opwarmen klaar! {warmupCorrect}/{WARMUP_COUNT} keersommen goed.
+            </div>
+          )}
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-dark/50"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           <h1 className="text-2xl font-extrabold">Je start nu aan het rondje rekenen van 10 minuten.</h1>
           <p className="mt-3 text-sm text-dark/50">
             {STAGE_LABELS[stage]} · level {wl}/20
           </p>
           <button
-            onClick={startSession}
+            onClick={launchWithWarmup}
             className="mt-8 w-full rounded-full bg-coral py-4 text-lg font-extrabold text-white transition hover:opacity-90"
           >
             Starten!
           </button>
+
+          {/* Timer toggle */}
+          <div className="mt-5 rounded-2xl bg-cream px-4 py-3 text-left text-sm">
+            <p className="text-dark/60">
+              Tijdens het oefenen zie je een <strong>tijdbalk</strong> die aftelt per som. Wil je die liever verbergen?
+            </p>
+            <button
+              onClick={toggleHideTimer}
+              className="mt-2 flex items-center gap-2 font-semibold text-dark/70 hover:text-dark"
+            >
+              <span className={`inline-flex h-5 w-9 items-center rounded-full transition ${hideTimer ? "bg-purple" : "bg-dark/20"}`}>
+                <span className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${hideTimer ? "translate-x-4" : "translate-x-0.5"}`} />
+              </span>
+              {hideTimer ? "Tijdbalk verborgen" : "Tijdbalk zichtbaar"}
+            </button>
+          </div>
+
           <Link href="/leerling/portal" className="mt-4 block text-sm text-dark/40 hover:text-coral">
             ← Terug
           </Link>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Warm-up screen ─────────────────────────────────────────────────────────
+  if (phase === "warmup") {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-md flex-col px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-dark/50">Dagelijks opwarmen</p>
+            <p className="text-xs text-dark/30">{warmupIndex + 1} van {WARMUP_COUNT} keersommen · 3 seconden</p>
+          </div>
+          <div className="flex gap-1">
+            {Array.from({ length: WARMUP_COUNT }).map((_, i) => (
+              <div key={i} className={`h-2 w-6 rounded-full ${i < warmupIndex ? "bg-green" : i === warmupIndex ? "bg-coral" : "bg-cream"}`} />
+            ))}
+          </div>
+        </div>
+
+        {/* Timer bar */}
+        <div className="mb-4 h-2 overflow-hidden rounded-full bg-cream">
+          <div className="h-2 rounded-full bg-coral transition-none" style={{ width: `${qTimePct}%` }} />
+        </div>
+
+        {/* Flash overlay */}
+        {flash && (
+          <div className={`pointer-events-none fixed inset-0 z-10 opacity-20 ${flash === "green" ? "bg-green" : "bg-coral"}`} />
+        )}
+
+        {/* Question */}
+        <div className="flex flex-1 flex-col items-center justify-center gap-8">
+          <p className="text-5xl font-extrabold tracking-tight">{question?.question}</p>
+          <form onSubmit={(e) => { e.preventDefault(); const v = parseInt(inputValue, 10); if (!isNaN(v)) handleWarmupAnswer(v); }} className="flex w-full flex-col items-center gap-4">
+            <input
+              ref={inputRef}
+              type="number"
+              inputMode="numeric"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              disabled={locked}
+              autoFocus
+              className="w-full rounded-2xl border-2 border-black/10 bg-white px-6 py-5 text-center text-4xl font-extrabold focus:border-coral focus:outline-none disabled:opacity-50"
+            />
+            <button type="submit" disabled={locked || !inputValue} className="w-full rounded-full bg-coral py-4 text-lg font-extrabold text-white transition hover:opacity-90 disabled:opacity-40">
+              Controleer
+            </button>
+          </form>
         </div>
       </main>
     );
@@ -766,12 +938,14 @@ function OefelenInner() {
       </div>
 
       {/* Per-question timer */}
-      <div className="mt-2 h-3 overflow-hidden rounded-full bg-white">
-        <div
-          className={`h-3 rounded-full transition-none ${isBonus ? "bg-yellow" : "bg-coral"}`}
-          style={{ width: `${qTimePct}%` }}
-        />
-      </div>
+      {!hideTimer && (
+        <div className="mt-2 h-3 overflow-hidden rounded-full bg-white">
+          <div
+            className={`h-3 rounded-full transition-none ${isBonus ? "bg-yellow" : "bg-coral"}`}
+            style={{ width: `${qTimePct}%` }}
+          />
+        </div>
+      )}
 
       {/* Question */}
       <div className={`mt-10 flex flex-1 flex-col items-center justify-center rounded-3xl transition ${

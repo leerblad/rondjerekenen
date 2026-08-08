@@ -41,6 +41,9 @@ export function LevelOverzichtKnop() {
             <p className="mt-1 text-sm text-dark/50">
               600 levels verdeeld over groep 4 t/m 8 — elk level bevat 20 sommen.
             </p>
+            <div className="mt-3 rounded-2xl bg-purple/8 border border-purple/15 px-4 py-3 text-sm text-dark/70">
+              <span className="font-semibold text-purple">Dagelijks opwarmen</span> — leerlingen in groep 5 t/m 8 beginnen elke dag met 5 keersommen (tafels 1–10, 3 seconden per som) vóór hun gewone rondje.
+            </div>
 
             <div className="mt-6 flex flex-col gap-6">
               {([4, 5, 6, 7, 8] as const).map((grade) => {

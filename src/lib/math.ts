@@ -113,7 +113,7 @@ export const LEVELS_PER_GRADE = STAGES_PER_GRADE * LEVELS_PER_STAGE; // 120
 export const MAX_LEVEL = STAGES.length * LEVELS_PER_STAGE; // 600
 export const QUESTIONS_PER_LEVEL = 20;
 export const SESSION_SECONDS = 600;
-export const BONUS_TIME_LIMIT = 4000;
+export const BONUS_TIME_LIMIT = 6000;
 export const UNLOCK_THRESHOLD = 0.95;
 
 /** Global level (1-600) → which stage */
@@ -474,6 +474,19 @@ export function generateBonusQuestion(currentLevel: number, retryPool: Question[
   // Use wl=20 for older stages (they should be fast), current stage uses its natural wl
   const wl = pickedIdx === currentStageIdx ? withinStageLevel(currentLevel) : 20;
   return makeForStage(stage, wl);
+}
+
+export const WARMUP_COUNT = 5;
+export const WARMUP_TIME_MS = 3000;
+
+/** Daily warm-up: random multiplication fact 1-10 × 1-10 */
+export function generateWarmupQuestion(prev?: Question | null): Question {
+  let a: number, b: number;
+  do {
+    a = rnd(1, 10);
+    b = rnd(1, 10);
+  } while (prev && `${a} × ${b} = ?` === prev.question);
+  return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
 }
 
 export function getUnlockThreshold(): number {
