@@ -3,10 +3,6 @@
 import { useState } from "react";
 import { GRADE_STAGES, STAGE_LABELS } from "@/lib/math";
 
-const GRADE_EMOJI: Record<number, string> = {
-  4: "🟢", 5: "🔵", 6: "🟡", 7: "🟠", 8: "🔴",
-};
-
 const GRADE_COLOR: Record<number, string> = {
   4: "bg-green/10 text-green border-green/20",
   5: "bg-purple/10 text-purple border-purple/20",
@@ -52,7 +48,7 @@ export function LevelOverzichtKnop() {
                 return (
                   <div key={grade}>
                     <div className={`mb-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-bold ${GRADE_COLOR[grade]}`}>
-                      {GRADE_EMOJI[grade]} Groep {grade}
+                      Groep {grade}
                     </div>
                     <table className="w-full border-collapse text-sm">
                       <thead>
