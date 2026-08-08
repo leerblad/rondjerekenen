@@ -856,7 +856,7 @@ function OefelenInner() {
 
           {totalAnswered > 0 && (
             <p className="mt-3 text-dark/60">
-              {totalCorrect} van de {totalAnswered} sommen goed — {Math.round((totalCorrect / totalAnswered) * 100)}%
+              {totalCorrect} van de {totalAnswered} sommen goed, {Math.round((totalCorrect / totalAnswered) * 100)}%
             </p>
           )}
 

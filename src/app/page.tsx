@@ -150,7 +150,7 @@ export default function Home() {
       </section>
 
       <footer className="pb-8 text-center text-xs text-dark/30">
-        Rondje Rekenen — dagelijks rekenen voor groep 4 t/m 8
+        Rondje Rekenen, dagelijks rekenen voor groep 4 t/m 8
       </footer>
     </div>
   );

@@ -39,7 +39,7 @@ export default function AdminLogin() {
         Admin
       </h1>
       <p className="mb-8 text-sm" style={{ color: "rgba(26,26,26,0.5)" }}>
-        Beheerderspagina — niet delen
+        Beheerderspagina, niet delen
       </p>
       <form onSubmit={submit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">

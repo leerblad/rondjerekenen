@@ -17,7 +17,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rondje Rekenen — dagelijks rekenen oefenen voor de bovenbouw",
+  title: "Rondje Rekenen, dagelijks rekenen oefenen voor de bovenbouw",
   description:
     "Laat leerlingen in groep 4 t/m 8 elke dag in 10 minuten rekenen oefenen. Automatisch op het juiste niveau, met inzicht voor de leerkracht. Gratis proberen.",
   keywords: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     "rekenprogramma bovenbouw",
   ],
   openGraph: {
-    title: "Rondje Rekenen — dagelijks rekenen oefenen voor de bovenbouw",
+    title: "Rondje Rekenen, dagelijks rekenen oefenen voor de bovenbouw",
     description:
       "Elke dag een rondje rekenen. Klaar in 10 minuten. Voor groep 4 t/m 8.",
     url: "https://www.rondjerekenen.nl",
