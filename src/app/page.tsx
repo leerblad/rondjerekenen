@@ -133,7 +133,7 @@ export default function Home() {
             <div className="flex-1">
               <h2 className="text-xl font-extrabold">Rondje Rekenen is gratis</h2>
               <p className="mt-3 text-sm leading-relaxed text-dark/60">
-                Rondje Rekenen is en blijft volledig gratis. Hosting en doorontwikkeling brengen wel kosten met zich mee. Wil je een steentje bijdragen? Doe dan een vrijwillige bijdrage via de QR.
+                Rondje Rekenen is volledig gratis. Hosting en doorontwikkeling brengen wel kosten met zich mee. Wil je een steentje bijdragen? Doe dan een vrijwillige bijdrage via de QR.
               </p>
               <p className="mt-3 text-xs text-dark/40">Scan de QR-code om een vrijwillige bijdrage te doen via Tikkie.</p>
             </div>
