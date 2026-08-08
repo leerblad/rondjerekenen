@@ -139,11 +139,8 @@ export default function Home() {
             </div>
             {/* QR rechts */}
             <div className="flex flex-col items-center gap-2 shrink-0">
-              {/* Vervang onderstaande div door een <Image> met de echte Tikkie QR */}
-              <div className="flex h-36 w-36 items-center justify-center rounded-2xl bg-cream text-center text-xs text-dark/30">
-                QR code<br />volgt
-              </div>
-              <span className="text-xs text-dark/30">Tikkie</span>
+              <Image src="/FullSizeRender.jpeg" alt="Tikkie QR-code" width={144} height={144} className="rounded-2xl" />
+              <span className="text-xs text-dark/40">Tikkie</span>
             </div>
           </div>
         </div>
