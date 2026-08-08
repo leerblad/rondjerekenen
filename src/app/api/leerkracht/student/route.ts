@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
+import { levelToGrade, MAX_LEVEL } from "@/lib/math";
 
 // Update a student's grade, level, and/or password (teacher action)
 export async function PATCH(req: Request) {
@@ -15,8 +16,10 @@ export async function PATCH(req: Request) {
   }
   if (level !== undefined) {
     const l = Number(level);
-    if (!(l >= 1 && l <= 140)) return NextResponse.json({ error: "Ongeldig level." }, { status: 400 });
+    if (!(l >= 1 && l <= MAX_LEVEL)) return NextResponse.json({ error: "Ongeldig level." }, { status: 400 });
     update.level = l;
+    // Keep grade column in sync with the level
+    update.grade = levelToGrade(l);
   }
   if (newPassword !== undefined) {
     if (typeof newPassword !== "string" || newPassword.length < 4) {

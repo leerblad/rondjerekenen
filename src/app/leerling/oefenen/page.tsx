@@ -210,7 +210,12 @@ function OefelenInner() {
     clearQTimer();
     if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
 
-    const q = isBonus ? generateBonusQuestion(lvl, pool) : generateQuestion(lvl, pool);
+    // Never show the same question twice in a row
+    const prev = questionRef.current;
+    let q = isBonus ? generateBonusQuestion(lvl, pool) : generateQuestion(lvl, pool);
+    if (prev && q.question === prev.question) {
+      q = isBonus ? generateBonusQuestion(lvl, pool) : generateQuestion(lvl, pool);
+    }
     questionRef.current = q;
     setQuestion(q);
     setQIndex(recorded.length);
