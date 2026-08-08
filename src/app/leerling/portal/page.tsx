@@ -196,7 +196,8 @@ export default function StudentPortal() {
           {student.coins} munten
         </p>
         <Link href="/leerling/winkel" className="text-sm text-purple hover:underline">
-          🛒 Naar de winkel
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          Naar de winkel
         </Link>
         </div>
       </div>
@@ -213,7 +214,8 @@ export default function StudentPortal() {
         </div>
         {student.streak > 0 && (
           <p className="mt-3 text-center text-sm font-semibold text-coral">
-            🔥 Jouw reeks: {student.streak} {student.streak === 1 ? "dag" : "dagen"} op rij — houd hem vast!
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            Jouw reeks: {student.streak} {student.streak === 1 ? "dag" : "dagen"} op rij — houd hem vast!
           </p>
         )}
         {student.streak === 0 && level < MAX_LEVEL && (
