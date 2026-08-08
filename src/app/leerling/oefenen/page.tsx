@@ -641,7 +641,9 @@ function OefelenInner() {
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
         <div className="w-full rounded-3xl bg-white p-10 shadow-sm">
-          <p className="text-4xl mb-2">🎉</p>
+          <div className="flex justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-dark/70"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
           <h1 className="text-2xl font-extrabold">
             {isBonus ? "Bonus sessie klaar!" : "Je bent klaar voor vandaag!"}
           </h1>
@@ -683,7 +685,7 @@ function OefelenInner() {
               href="/leerling/winkel"
               className="block w-full rounded-full bg-yellow/30 py-3 font-semibold text-dark transition hover:opacity-80"
             >
-              🛒 Naar de winkel
+              Naar de winkel
             </Link>
             {!isBonus && (
               <Link
@@ -691,7 +693,7 @@ function OefelenInner() {
                 className={`block w-full rounded-full py-3 font-semibold transition ${canBonus ? "bg-purple text-white hover:opacity-90" : "bg-cream text-dark/30 cursor-not-allowed"}`}
                 onClick={canBonus ? undefined : (e) => e.preventDefault()}
               >
-                ⚡ Extra sessie {canBonus ? `(${BONUS_COST} munten)` : `(${BONUS_COST - (student?.coins ?? 0)} munten te kort)`}
+                Extra sessie {canBonus ? `(${BONUS_COST} munten)` : `(${BONUS_COST - (student?.coins ?? 0)} munten te kort)`}
               </Link>
             )}
           </div>
@@ -710,7 +712,7 @@ function OefelenInner() {
       {/* Paused overlay */}
       {isPaused && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-dark/80 text-center text-white">
-          <p className="text-5xl">⏸️</p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           <h2 className="text-2xl font-extrabold">Gepauzeerd</h2>
           <p className="text-sm text-white/60">De timer staat stil.</p>
           <button

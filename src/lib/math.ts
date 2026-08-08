@@ -113,7 +113,7 @@ export const LEVELS_PER_GRADE = STAGES_PER_GRADE * LEVELS_PER_STAGE; // 120
 export const MAX_LEVEL = STAGES.length * LEVELS_PER_STAGE; // 600
 export const QUESTIONS_PER_LEVEL = 20;
 export const SESSION_SECONDS = 600;
-export const BONUS_TIME_LIMIT = 2000;
+export const BONUS_TIME_LIMIT = 4000;
 export const UNLOCK_THRESHOLD = 0.95;
 
 /** Global level (1-600) → which stage */

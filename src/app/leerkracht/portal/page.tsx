@@ -156,6 +156,13 @@ export default function Portal() {
     if (classCode) load(classCode);
   }, [classCode, load]);
 
+  // Auto-refresh every 30 seconds so level/onderdeel/voortgang up to date blijft
+  useEffect(() => {
+    if (!classCode) return;
+    const interval = setInterval(() => load(classCode), 30_000);
+    return () => clearInterval(interval);
+  }, [classCode, load]);
+
   async function changeLevel(id: string, level: number) {
     const grade = levelToGrade(level);
     setRows((r) => r.map((x) => (x.id === id ? { ...x, level, grade } : x)));
@@ -307,7 +314,16 @@ export default function Portal() {
       </div>
 
       <div className="mt-10 flex items-center justify-between">
-        <h2 className="text-xl font-bold">Leerlingen ({rows.length})</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold">Leerlingen ({rows.length})</h2>
+          <button
+            onClick={() => load(classCode)}
+            title="Ververs lijst"
+            className="rounded-full border border-black/10 p-1.5 text-dark/40 transition hover:border-dark/30 hover:text-dark"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
         {rows.length > 0 && (
           <button
             onClick={async () => {
