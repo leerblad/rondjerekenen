@@ -347,20 +347,42 @@ const PCT_BASES  = [100, 200, 300, 400, 500, 80, 120, 150, 250, 60, 40, 1000];
 const PCT_BASES2 = [100, 200, 150, 80, 60, 120, 250, 400, 500, 1000];
 
 function makeG8Plus(wl: number): Question {
-  // wl=1: result up to 2000, wl=20: result up to 10000
-  const maxResult = scale(wl, 2000, 10000);
-  const step = wl <= 7 ? 1000 : wl <= 14 ? 100 : 25;
-  const a = Math.round(rnd(100, maxResult - 100) / step) * step;
-  const b = Math.round(rnd(50, Math.max(50, maxResult - a)) / step) * step;
+  // wl 1-6:  ronde honderden  → 400 + 300, 200 + 600
+  // wl 7-13: tientallen       → 550 + 120, 840 + 230
+  // wl 14-20: willekeurig     → 1248 + 361
+  let a: number, b: number;
+  if (wl <= 6) {
+    a = rnd(1, 9) * 100;
+    b = rnd(1, 9) * 100;
+  } else if (wl <= 13) {
+    const maxVal = scale(wl, 300, 4000);
+    a = Math.round(rnd(100, maxVal) / 10) * 10;
+    b = Math.round(rnd(10, Math.min(990, Math.floor(maxVal / 2))) / 10) * 10;
+  } else {
+    const maxResult = scale(wl, 2000, 10000);
+    a = rnd(200, maxResult - 200);
+    b = rnd(100, Math.min(maxResult - a, 3000));
+  }
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG8Min(wl: number): Question {
-  // wl=1: a up to 2000, wl=20: a up to 10000
-  const maxA = scale(wl, 2000, 10000);
-  const step = wl <= 7 ? 1000 : wl <= 14 ? 100 : 25;
-  const a = Math.round(rnd(500, maxA) / step) * step;
-  const b = Math.round(rnd(50, Math.max(50, a - 50)) / step) * step;
+  // wl 1-6:  ronde honderden  → 1000 - 500, 800 - 300
+  // wl 7-13: tientallen       → 620 - 110, 850 - 230
+  // wl 14-20: willekeurig     → 1348 - 261
+  let a: number, b: number;
+  if (wl <= 6) {
+    b = rnd(1, 8) * 100;
+    a = b + rnd(1, 9) * 100; // resultaat altijd positief en niet-triviaal
+  } else if (wl <= 13) {
+    const maxVal = scale(wl, 300, 5000);
+    b = Math.round(rnd(10, Math.floor(maxVal / 3)) / 10) * 10;
+    a = b + Math.round(rnd(10, Math.min(Math.floor(maxVal * 2 / 3), 2000)) / 10) * 10;
+  } else {
+    const maxA = scale(wl, 2000, 10000);
+    b = rnd(100, Math.floor(maxA / 2));
+    a = b + rnd(100, Math.min(maxA - b, 3000));
+  }
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
 
