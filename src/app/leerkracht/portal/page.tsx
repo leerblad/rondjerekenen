@@ -128,6 +128,8 @@ export default function Portal() {
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [openMsg, setOpenMsg] = useState<Message | null>(null);
+  const [pendingLevelEdit, setPendingLevelEdit] = useState<number | null>(null);
+  const [restoringStreakAll, setRestoringStreakAll] = useState(false);
 
   const teacher =
     user && user.role === "teacher" ? user : null;
@@ -199,6 +201,7 @@ export default function Portal() {
 
   async function openStudent(row: Row) {
     setSelected(row);
+    setPendingLevelEdit(null);
     setProgress(null);
     const res = await fetch(`/api/leerling/${row.id}/progress`);
     setProgress(await res.json());
@@ -303,7 +306,38 @@ export default function Portal() {
         </div>
       </div>
 
-      <h2 className="mt-10 text-xl font-bold">Leerlingen ({rows.length})</h2>
+      <div className="mt-10 flex items-center justify-between">
+        <h2 className="text-xl font-bold">Leerlingen ({rows.length})</h2>
+        {rows.length > 0 && (
+          <button
+            onClick={async () => {
+              if (!confirm("Herstel de reeks voor alle leerlingen in deze klas? Gebruik dit bij vakantie of schoolsluiting.")) return;
+              setRestoringStreakAll(true);
+              const results = await Promise.all(
+                rows.map((r) =>
+                  fetch("/api/leerkracht/herstel-reeks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: r.id }),
+                  }).then((res) => res.json().then((d) => ({ id: r.id, streak: d.streak ?? r.streak })))
+                )
+              );
+              setRows((prev) =>
+                prev.map((r) => {
+                  const found = results.find((x) => x.id === r.id);
+                  return found ? { ...r, streak: found.streak } : r;
+                })
+              );
+              setRestoringStreakAll(false);
+              alert("Reeksen hersteld voor de hele klas.");
+            }}
+            disabled={restoringStreakAll}
+            className="rounded-full border border-green px-4 py-2 text-sm font-semibold text-green transition hover:bg-green hover:text-white disabled:opacity-40"
+          >
+            {restoringStreakAll ? "Bezig..." : "Herstel reeks voor hele klas"}
+          </button>
+        )}
+      </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-black/5 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="bg-cream text-dark/60">
@@ -437,10 +471,12 @@ export default function Portal() {
 
             {/* Level aanpassen — groep → blok → level */}
             {(() => {
-              const lvl = selected.level ?? 1;
+              const savedLvl = selected.level ?? 1;
+              const lvl = pendingLevelEdit ?? savedLvl;
               const g = levelToGrade(lvl);
               const stage = levelToStage(lvl);
               const wl = withinStageLevel(lvl);
+              const isDirty = pendingLevelEdit !== null && pendingLevelEdit !== savedLvl;
               return (
                 <div className="mt-4 rounded-2xl bg-cream p-4">
                   <p className="mb-2 text-sm font-semibold">Level aanpassen</p>
@@ -452,7 +488,7 @@ export default function Portal() {
                         value={g}
                         onChange={(e) => {
                           const ng = Number(e.target.value) as Grade;
-                          changeLevel(selected.id, GRADE_START_LEVEL[ng]);
+                          setPendingLevelEdit(GRADE_START_LEVEL[ng]);
                         }}
                         className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
                       >
@@ -469,7 +505,7 @@ export default function Portal() {
                         onChange={(e) => {
                           const s = e.target.value as Stage;
                           const stageIdx = GRADE_STAGES[g].indexOf(s as typeof GRADE_STAGES[typeof g][number]);
-                          changeLevel(selected.id, GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE + wl - 1);
+                          setPendingLevelEdit(GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE + wl - 1);
                         }}
                         className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
                       >
@@ -485,7 +521,7 @@ export default function Portal() {
                         value={wl}
                         onChange={(e) => {
                           const stageIdx = GRADE_STAGES[g].indexOf(stage as typeof GRADE_STAGES[typeof g][number]);
-                          changeLevel(selected.id, GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE + Number(e.target.value) - 1);
+                          setPendingLevelEdit(GRADE_START_LEVEL[g] + stageIdx * LEVELS_PER_STAGE + Number(e.target.value) - 1);
                         }}
                         className="flex-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-sm"
                       >
@@ -495,8 +531,19 @@ export default function Portal() {
                       </select>
                     </div>
                     <p className="text-xs text-dark/40">
-                      Huidig blok: {STAGE_LABELS[stage]}, level {wl} van 20
+                      Huidig blok: {STAGE_LABELS[levelToStage(savedLvl)]}, level {withinStageLevel(savedLvl)} van 20
                     </p>
+                    <button
+                      onClick={async () => {
+                        if (pendingLevelEdit === null) return;
+                        await changeLevel(selected.id, pendingLevelEdit);
+                        setPendingLevelEdit(null);
+                      }}
+                      disabled={!isDirty}
+                      className="mt-1 rounded-full bg-purple px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-30"
+                    >
+                      Opslaan
+                    </button>
                   </div>
                 </div>
               );
@@ -519,14 +566,14 @@ export default function Portal() {
                   if (res.ok) {
                     setRows((r) => r.map((x) => x.id === selected.id ? { ...x, streak: data.streak } : x));
                     setSelected((s) => s ? { ...s, streak: data.streak } : s);
-                    alert(`Reeks hersteld naar ${data.streak} dagen 🔥`);
+                    alert(`Reeks hersteld naar ${data.streak} dagen.`);
                   } else {
                     alert(data.error || "Mislukt.");
                   }
                 }}
                 className="rounded-full border border-green px-4 py-2 text-sm font-semibold text-green transition hover:bg-green hover:text-white"
               >
-                🔁 Herstel reeks
+                Herstel reeks
               </button>
             </div>
 

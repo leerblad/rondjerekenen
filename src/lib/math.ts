@@ -21,7 +21,7 @@ export type Stage =
   // Groep 7 (levels 381-500, 6 blocks)
   | "g7_tafels" | "g7_deeltafels" | "g7_plus" | "g7_min" | "g7_plus_min" | "g7_alles"
   // Groep 8 (levels 501-620, 6 blocks)
-  | "g8_plus" | "g8_min" | "g8_pct_basis" | "g8_pct_meer" | "g8_plus_min" | "g8_alles";
+  | "g8_plus" | "g8_min" | "g8_pct_basis" | "g8_tafels" | "g8_plus_min" | "g8_alles";
 
 export const STAGES: Stage[] = [
   // Groep 4 (6 blocks, levels 1-120)
@@ -33,7 +33,7 @@ export const STAGES: Stage[] = [
   // Groep 7 (6 blocks, levels 381-500)
   "g7_tafels", "g7_deeltafels", "g7_plus", "g7_min", "g7_plus_min", "g7_alles",
   // Groep 8 (6 blocks, levels 501-620)
-  "g8_plus", "g8_min", "g8_pct_basis", "g8_pct_meer", "g8_plus_min", "g8_alles",
+  "g8_plus", "g8_min", "g8_pct_basis", "g8_tafels", "g8_plus_min", "g8_alles",
 ];
 
 export const STAGE_LABELS: Record<Stage, string> = {
@@ -70,7 +70,7 @@ export const STAGE_LABELS: Record<Stage, string> = {
   g8_plus:      "Optellen t/m 10.000",
   g8_min:       "Aftrekken t/m 10.000",
   g8_pct_basis: "Procenten (10%, 25%, 50%)",
-  g8_pct_meer:  "Meer procenten",
+  g8_tafels:    "Tafels snel (2 sec)",
   g8_plus_min:  "Grote sommen",
   g8_alles:     "Alles groep 8",
 };
@@ -84,7 +84,7 @@ export const GRADE_STAGES: Record<Grade, Stage[]> = {
   5: ["g5_plus", "g5_min", "g5_plus_min", "g5_tafels", "g5_deeltafels", "g5_tafels_alles", "g5_alles"],
   6: ["g6_tafels", "g6_deeltafels", "g6_hogere", "g6_plus", "g6_min", "g6_alles"],
   7: ["g7_tafels", "g7_deeltafels", "g7_plus", "g7_min", "g7_plus_min", "g7_alles"],
-  8: ["g8_plus", "g8_min", "g8_pct_basis", "g8_pct_meer", "g8_plus_min", "g8_alles"],
+  8: ["g8_plus", "g8_min", "g8_pct_basis", "g8_tafels", "g8_plus_min", "g8_alles"],
 };
 
 // Grade 5 has 7 blocks (140 levels); all others have 6 blocks (120 levels)
@@ -141,7 +141,9 @@ export function withinGradeLevel(level: number): number {
 export function getTimeLimit(level: number): number {
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  // Groep 6 tafels & groep 7 tafels/deeltafels: 3s → 2s (automatiseren = snel!)
+  // Groep 8 tafels: flat 2s (they should know these cold)
+  if (stage === "g8_tafels") return 2000;
+  // Groep 6 tafels & groep 7 tafels/deeltafels: 3s → 2s
   if (stage === "g6_tafels" || stage === "g6_deeltafels" ||
       stage === "g7_tafels" || stage === "g7_deeltafels") {
     return Math.round(3000 - (wl - 1) * (1000 / 19));
@@ -376,6 +378,16 @@ function makeG8PctMeer(wl: number): Question {
   return { question: `${pct}% van ${base} = ?`, answer, operation: "pct", a: pct, b: base };
 }
 
+function makeG8Tafel(_wl: number): Question {
+  // All tables 1-10 × 1-10 at speed (flat 2s time limit for grade 8)
+  const a = rnd(1, 10);
+  const b = rnd(1, 10);
+  if (Math.random() < 0.5) {
+    return { question: `${a} × ${b} = ?`, answer: a * b, operation: "keer", a, b };
+  }
+  return { question: `${a * b} ÷ ${b} = ?`, answer: a, operation: "deel", a, b };
+}
+
 // ─── Stage dispatcher ─────────────────────────────────────────────────────────
 
 function makeForStage(stage: Stage, wl: number): Question {
@@ -413,9 +425,9 @@ function makeForStage(stage: Stage, wl: number): Question {
     case "g8_plus":       return makeG8Plus(wl);
     case "g8_min":        return makeG8Min(wl);
     case "g8_pct_basis":  return makeG8PctBasis(wl);
-    case "g8_pct_meer":   return makeG8PctMeer(wl);
+    case "g8_tafels":     return makeG8Tafel(wl);
     case "g8_plus_min":   return Math.random() < 0.5 ? makeG8Plus(wl) : makeG8Min(wl);
-    case "g8_alles":      return pickFrom([makeG8Plus, makeG8Min, makeG8PctBasis, makeG8PctMeer])(wl);
+    case "g8_alles":      return pickFrom([makeG8Plus, makeG8Min, makeG8PctBasis, makeG8Tafel])(wl);
   }
 }
 
@@ -478,6 +490,6 @@ export function unlockedOperations(level: number): Operation[] {
        "g8_alles"].includes(stage)) ops.push("keer");
   if (["g5_deeltafels","g5_tafels_alles","g6_deeltafels","g6_hogere","g6_alles",
        "g7_deeltafels","g7_alles","g8_alles"].includes(stage)) ops.push("deel");
-  if (["g8_pct_basis","g8_pct_meer","g8_alles"].includes(stage)) ops.push("pct");
+  if (["g8_pct_basis","g8_alles"].includes(stage)) ops.push("pct");
   return ops;
 }
