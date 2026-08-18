@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
+import { checkLoginAllowed, recordFailedAttempt, resetAttempts } from "@/lib/loginAttempts";
 
 export async function POST(req: Request) {
   const { classCode, nickname, password } = await req.json();
@@ -9,6 +10,16 @@ export async function POST(req: Request) {
 
   if (!code || !nickname) {
     return NextResponse.json({ error: "Vul alle velden in." }, { status: 400 });
+  }
+
+  const identifier = `student:${code}:${String(nickname).toLowerCase().trim()}`;
+
+  const check = await checkLoginAllowed(identifier);
+  if (!check.allowed) {
+    return NextResponse.json(
+      { error: `Te veel mislukte pogingen. Probeer het over ${check.minutesLeft} minuten opnieuw.` },
+      { status: 429 }
+    );
   }
 
   const { data } = await supabaseAdmin
@@ -21,6 +32,7 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (!data) {
+    await recordFailedAttempt(identifier, "leerling");
     return NextResponse.json(
       { error: "Geen leerling gevonden met deze naam en klascode." },
       { status: 404 }
@@ -34,9 +46,12 @@ export async function POST(req: Request) {
     }
     const valid = await bcrypt.compare(String(password), data.password_hash);
     if (!valid) {
+      await recordFailedAttempt(identifier, "leerling");
       return NextResponse.json({ error: "Verkeerd wachtwoord." }, { status: 401 });
     }
   }
+
+  await resetAttempts(identifier);
 
   const token = await signToken({
     role: "student",

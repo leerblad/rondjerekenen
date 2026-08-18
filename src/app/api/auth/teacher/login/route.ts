@@ -2,11 +2,22 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
+import { checkLoginAllowed, recordFailedAttempt, resetAttempts } from "@/lib/loginAttempts";
 
 export async function POST(req: Request) {
   const { name, password } = await req.json();
   if (!name || !password) {
     return NextResponse.json({ error: "Vul alle velden in." }, { status: 400 });
+  }
+
+  const identifier = `teacher:${String(name).toLowerCase().trim()}`;
+
+  const check = await checkLoginAllowed(identifier);
+  if (!check.allowed) {
+    return NextResponse.json(
+      { error: `Te veel mislukte pogingen. Probeer het over ${check.minutesLeft} minuten opnieuw.` },
+      { status: 429 }
+    );
   }
 
   const { data } = await supabaseAdmin
@@ -16,11 +27,14 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (!data || !(await bcrypt.compare(password, data.password_hash))) {
+    await recordFailedAttempt(identifier, "leerkracht");
     return NextResponse.json(
       { error: "Onjuiste naam of wachtwoord." },
       { status: 401 }
     );
   }
+
+  await resetAttempts(identifier);
 
   // Fetch avatar separately — column may not exist on older DB schemas
   const { data: extra } = await supabaseAdmin

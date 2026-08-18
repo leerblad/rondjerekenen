@@ -77,6 +77,15 @@ export default function AdminPage() {
     setContactMessages((ms) => ms.map((m) => m.id === id ? { ...m, read: true } : m));
   }
 
+  async function deleteContactMessage(id: string) {
+    await fetch("/api/admin/contact-berichten", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setContactMessages((ms) => ms.filter((m) => m.id !== id));
+  }
+
   async function resetPassword(teacherId: string) {
     const newPassword = resetPasswords[teacherId] ?? "";
     if (newPassword.length < 6) {
@@ -261,7 +270,9 @@ export default function AdminPage() {
                           {!msg.read && (
                             <span className="rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ background: "#E8705A" }}>Nieuw</span>
                           )}
-                          <span className="font-semibold">{msg.teacher_name ?? "Onbekend"}</span>
+                          <span className={`font-semibold ${msg.teacher_name === "⚠ Systeem" ? "text-coral" : ""}`}>
+                            {msg.teacher_name ?? "Onbekend"}
+                          </span>
                           {msg.subject && (
                             <span className="text-sm" style={{ color: "rgba(26,26,26,0.5)" }}>— {msg.subject}</span>
                           )}
@@ -271,15 +282,24 @@ export default function AdminPage() {
                           {new Date(msg.sent_at).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" })}
                         </p>
                       </div>
-                      {!msg.read && (
+                      <div className="flex flex-shrink-0 gap-2">
+                        {!msg.read && (
+                          <button
+                            onClick={() => markContactRead(msg.id)}
+                            className="rounded-xl px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
+                            style={{ background: "rgba(26,26,26,0.08)", color: "rgba(26,26,26,0.6)" }}
+                          >
+                            Gelezen
+                          </button>
+                        )}
                         <button
-                          onClick={() => markContactRead(msg.id)}
-                          className="flex-shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
-                          style={{ background: "rgba(26,26,26,0.08)", color: "rgba(26,26,26,0.6)" }}
+                          onClick={() => deleteContactMessage(msg.id)}
+                          className="rounded-xl px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
+                          style={{ background: "rgba(232,112,90,0.12)", color: "#E8705A" }}
                         >
-                          Gelezen
+                          Verwijder
                         </button>
-                      )}
+                      </div>
                     </div>
                   </div>
                 ))}

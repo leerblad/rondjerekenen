@@ -31,3 +31,12 @@ export async function PATCH(req: Request) {
   await supabaseAdmin.from("contact_messages").update({ read: true }).eq("id", id);
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(req: Request) {
+  if (!(await checkAdminCookie())) {
+    return NextResponse.json({ error: "Niet geautoriseerd." }, { status: 401 });
+  }
+  const { id } = await req.json();
+  await supabaseAdmin.from("contact_messages").delete().eq("id", id);
+  return NextResponse.json({ ok: true });
+}
