@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { checkLoginAllowed, recordFailedAttempt, resetAttempts } from "@/lib/loginAttempts";
 
-// Hash of "adminHesterbold2" — stored as env var ADMIN_PASSWORD_HASH or compared plaintext via ADMIN_PASSWORD
 export async function POST(req: Request) {
   const { password } = await req.json();
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "adminHesterbold2";
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!password) {
     return NextResponse.json({ error: "Wachtwoord vereist." }, { status: 400 });
@@ -18,6 +17,10 @@ export async function POST(req: Request) {
       { error: `Te veel mislukte pogingen. Probeer het over ${check.minutesLeft} minuten opnieuw.` },
       { status: 429 }
     );
+  }
+
+  if (!adminPassword) {
+    return NextResponse.json({ error: "Admin niet geconfigureerd." }, { status: 500 });
   }
 
   let valid = false;
