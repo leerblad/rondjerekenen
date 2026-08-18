@@ -37,6 +37,7 @@ export default function AdminPage() {
   const [coinStatus, setCoinStatus] = useState<Record<string, string>>({});
   const [deleting, setDeleting] = useState<string | null>(null);
   const [restoringStreak, setRestoringStreak] = useState<string | null>(null);
+  const [tab, setTab] = useState<"leerkrachten" | "berichten">("leerkrachten");
 
   type ContactMessage = {
     id: string;
@@ -202,7 +203,7 @@ export default function AdminPage() {
     <main className="min-h-screen px-6 py-10" style={{ background: "#FAF6F0", color: "#1A1A1A" }}>
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-6 flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-extrabold">Beheerderspagina</h1>
             <p
@@ -221,7 +222,73 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Teachers */}
+        {/* Tabs */}
+        <div className="mb-8 flex gap-2">
+          <button
+            onClick={() => setTab("leerkrachten")}
+            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${tab === "leerkrachten" ? "bg-dark text-white" : "bg-dark/8 text-dark/60 hover:bg-dark/15"}`}
+          >
+            Leerkrachten
+          </button>
+          <button
+            onClick={() => setTab("berichten")}
+            className={`relative rounded-full px-5 py-2 text-sm font-semibold transition ${tab === "berichten" ? "bg-dark text-white" : "bg-dark/8 text-dark/60 hover:bg-dark/15"}`}
+          >
+            Berichten
+            {contactMessages.filter((m) => !m.read).length > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: "#E8705A" }}>
+                {contactMessages.filter((m) => !m.read).length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {tab === "berichten" && (
+          <div className="mb-8">
+            {contactMessages.length === 0 ? (
+              <p style={{ color: "rgba(26,26,26,0.4)" }}>Nog geen berichten.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {contactMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`rounded-2xl border p-5 ${msg.read ? "border-black/8 bg-white/60" : "border-coral/30 bg-coral/5"}`}
+                    style={msg.read ? {} : { borderColor: "rgba(232,112,90,0.3)", background: "rgba(232,112,90,0.05)" }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {!msg.read && (
+                            <span className="rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ background: "#E8705A" }}>Nieuw</span>
+                          )}
+                          <span className="font-semibold">{msg.teacher_name ?? "Onbekend"}</span>
+                          {msg.subject && (
+                            <span className="text-sm" style={{ color: "rgba(26,26,26,0.5)" }}>— {msg.subject}</span>
+                          )}
+                        </div>
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{msg.message}</p>
+                        <p className="mt-2 text-xs" style={{ color: "rgba(26,26,26,0.3)" }}>
+                          {new Date(msg.sent_at).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" })}
+                        </p>
+                      </div>
+                      {!msg.read && (
+                        <button
+                          onClick={() => markContactRead(msg.id)}
+                          className="flex-shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition hover:opacity-80"
+                          style={{ background: "rgba(26,26,26,0.08)", color: "rgba(26,26,26,0.6)" }}
+                        >
+                          Gelezen
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "leerkrachten" && <>
         {teachers.map((teacher) => {
           const teacherStudents = students.filter(
             (s) => s.class_code === teacher.class_code
@@ -471,56 +538,7 @@ export default function AdminPage() {
         {teachers.length === 0 && (
           <p style={{ color: "rgba(26,26,26,0.4)" }}>Nog geen leerkrachten.</p>
         )}
-      </div>
-
-      {/* Berichten van leerkrachten */}
-      <div className="mt-12">
-        <h2 className="mb-4 text-2xl font-extrabold">
-          Berichten van leerkrachten
-          {contactMessages.filter((m) => !m.read).length > 0 && (
-            <span className="ml-3 inline-flex items-center justify-center rounded-full bg-coral px-2.5 py-0.5 text-sm font-bold text-white">
-              {contactMessages.filter((m) => !m.read).length} nieuw
-            </span>
-          )}
-        </h2>
-        {contactMessages.length === 0 ? (
-          <p style={{ color: "rgba(26,26,26,0.4)" }}>Nog geen berichten.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {contactMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`rounded-2xl border p-5 ${msg.read ? "border-black/8 bg-white/60" : "border-coral/30 bg-coral/5"}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {!msg.read && (
-                        <span className="rounded-full bg-coral px-2 py-0.5 text-xs font-bold text-white">Nieuw</span>
-                      )}
-                      <span className="font-semibold">{msg.teacher_name ?? "Onbekend"}</span>
-                      {msg.subject && (
-                        <span className="text-sm text-dark/50">— {msg.subject}</span>
-                      )}
-                    </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{msg.message}</p>
-                    <p className="mt-2 text-xs text-dark/30">
-                      {new Date(msg.sent_at).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" })}
-                    </p>
-                  </div>
-                  {!msg.read && (
-                    <button
-                      onClick={() => markContactRead(msg.id)}
-                      className="flex-shrink-0 rounded-xl bg-dark/8 px-3 py-1.5 text-xs font-semibold text-dark/60 hover:bg-dark/15"
-                    >
-                      Gelezen
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        </>}
       </div>
     </main>
   );
