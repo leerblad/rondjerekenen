@@ -176,7 +176,7 @@ function OefelenInner() {
   // ── Adaptive time limit for grade 8 (non-tafels) ─────────────────────────
   // Persisted in localStorage; adjusts after each level based on accuracy
   const ADAPTIVE_MIN = 3000;
-  const ADAPTIVE_MAX = 6000;
+  const ADAPTIVE_MAX = 8000;
   const ADAPTIVE_STEP = 500;
 
   const getAdaptiveTime = useCallback((lvl: number): number => {
@@ -797,13 +797,18 @@ function OefelenInner() {
             </div>
           )}
 
-          {/* Mastery grid */}
-          {levelResult && (
-            <div className="mt-6">
-              <p className="mb-2 text-sm font-semibold">Overzicht sommen:</p>
-              <MasteryGrid answers={answersRef.current} level={r.level} />
-            </div>
-          )}
+          {/* Mastery grid — only for multiplication/division stages */}
+          {levelResult && (() => {
+            const s = levelToStage(r.level);
+            const isTafels = ["g4_tafels","g5_tafels","g5_deeltafels","g5_tafels_alles",
+              "g6_tafels","g6_deeltafels","g6_hogere","g7_tafels","g7_deeltafels","g8_tafels"].includes(s);
+            return isTafels ? (
+              <div className="mt-6">
+                <p className="mb-2 text-sm font-semibold">Overzicht sommen:</p>
+                <MasteryGrid answers={answersRef.current} level={r.level} />
+              </div>
+            ) : null;
+          })()}
 
           {/* Remaining time */}
           <p className="mt-4 text-center text-xs text-dark/40">
