@@ -38,6 +38,17 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [restoringStreak, setRestoringStreak] = useState<string | null>(null);
 
+  type ContactMessage = {
+    id: string;
+    teacher_id: string;
+    teacher_name: string | null;
+    subject: string | null;
+    message: string;
+    sent_at: string;
+    read: boolean;
+  };
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+
   useEffect(() => {
     fetch("/api/admin/accounts")
       .then(async (res) => {
@@ -48,9 +59,22 @@ export default function AdminPage() {
         const data = await res.json();
         setTeachers(data.teachers ?? []);
         setStudents(data.students ?? []);
+        // Load contact messages
+        fetch("/api/admin/contact-berichten")
+          .then((r) => r.json())
+          .then((d) => setContactMessages(d.messages ?? []));
       })
       .finally(() => setLoading(false));
   }, [router]);
+
+  async function markContactRead(id: string) {
+    await fetch("/api/admin/contact-berichten", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setContactMessages((ms) => ms.map((m) => m.id === id ? { ...m, read: true } : m));
+  }
 
   async function resetPassword(teacherId: string) {
     const newPassword = resetPasswords[teacherId] ?? "";
@@ -446,6 +470,56 @@ export default function AdminPage() {
 
         {teachers.length === 0 && (
           <p style={{ color: "rgba(26,26,26,0.4)" }}>Nog geen leerkrachten.</p>
+        )}
+      </div>
+
+      {/* Berichten van leerkrachten */}
+      <div className="mt-12">
+        <h2 className="mb-4 text-2xl font-extrabold">
+          Berichten van leerkrachten
+          {contactMessages.filter((m) => !m.read).length > 0 && (
+            <span className="ml-3 inline-flex items-center justify-center rounded-full bg-coral px-2.5 py-0.5 text-sm font-bold text-white">
+              {contactMessages.filter((m) => !m.read).length} nieuw
+            </span>
+          )}
+        </h2>
+        {contactMessages.length === 0 ? (
+          <p style={{ color: "rgba(26,26,26,0.4)" }}>Nog geen berichten.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {contactMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`rounded-2xl border p-5 ${msg.read ? "border-black/8 bg-white/60" : "border-coral/30 bg-coral/5"}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {!msg.read && (
+                        <span className="rounded-full bg-coral px-2 py-0.5 text-xs font-bold text-white">Nieuw</span>
+                      )}
+                      <span className="font-semibold">{msg.teacher_name ?? "Onbekend"}</span>
+                      {msg.subject && (
+                        <span className="text-sm text-dark/50">— {msg.subject}</span>
+                      )}
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{msg.message}</p>
+                    <p className="mt-2 text-xs text-dark/30">
+                      {new Date(msg.sent_at).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" })}
+                    </p>
+                  </div>
+                  {!msg.read && (
+                    <button
+                      onClick={() => markContactRead(msg.id)}
+                      className="flex-shrink-0 rounded-xl bg-dark/8 px-3 py-1.5 text-xs font-semibold text-dark/60 hover:bg-dark/15"
+                    >
+                      Gelezen
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </main>

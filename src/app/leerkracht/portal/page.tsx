@@ -131,6 +131,13 @@ export default function Portal() {
   const [pendingLevelEdit, setPendingLevelEdit] = useState<number | null>(null);
   const [restoringStreakAll, setRestoringStreakAll] = useState(false);
 
+  // Contact / vraag sturen naar beheerder
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactSubject, setContactSubject] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactSending, setContactSending] = useState(false);
+  const [contactStatus, setContactStatus] = useState<string | null>(null);
+
   const teacher =
     user && user.role === "teacher" ? user : null;
 
@@ -232,6 +239,32 @@ export default function Portal() {
     }
   }
 
+  async function sendContact(e: React.FormEvent) {
+    e.preventDefault();
+    if (!teacher || !contactMessage.trim()) return;
+    setContactSending(true);
+    setContactStatus(null);
+    const res = await fetch("/api/leerkracht/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        teacherId: teacher.id,
+        name: teacher.name,
+        subject: contactSubject,
+        message: contactMessage,
+      }),
+    });
+    const data = await res.json();
+    setContactSending(false);
+    if (!res.ok) {
+      setContactStatus(data.error || "Verzenden mislukt.");
+    } else {
+      setContactStatus("Bericht verzonden! We nemen contact op als dat nodig is.");
+      setContactSubject("");
+      setContactMessage("");
+    }
+  }
+
   if (!ready || !teacher) return null;
 
   const unread = messages.filter((m) => !m.read);
@@ -266,19 +299,86 @@ export default function Portal() {
           </button>
         </div>
       )}
+      {/* Contact modal */}
+      {contactOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-dark/60 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setContactOpen(false); }}
+        >
+          <div className="relative w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl">
+            <button
+              onClick={() => setContactOpen(false)}
+              className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-cream text-dark/40 hover:text-dark"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-extrabold">Stuur een bericht</h2>
+            <p className="mt-1 text-sm text-dark/50">Heb je een vraag, tip of hulp nodig? We lezen je bericht zo snel mogelijk.</p>
+            <p className="mt-1 text-xs text-dark/30">Maximaal 3 berichten per uur.</p>
+            <form onSubmit={sendContact} className="mt-5 flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-dark/70">Onderwerp <span className="font-normal text-dark/30">(optioneel)</span></label>
+                <input
+                  type="text"
+                  value={contactSubject}
+                  onChange={(e) => setContactSubject(e.target.value)}
+                  placeholder="bijv. Vraag over levels"
+                  maxLength={100}
+                  className="w-full rounded-2xl border border-dark/10 bg-cream px-4 py-3 text-sm focus:border-coral focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-dark/70">Bericht</label>
+                <textarea
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  required
+                  rows={5}
+                  maxLength={1000}
+                  placeholder="Typ hier je vraag of opmerking..."
+                  className="w-full rounded-2xl border border-dark/10 bg-cream px-4 py-3 text-sm focus:border-coral focus:outline-none resize-none"
+                />
+                <p className="mt-0.5 text-right text-xs text-dark/30">{contactMessage.length}/1000</p>
+              </div>
+              {contactStatus && (
+                <p className={`rounded-2xl px-4 py-3 text-sm font-semibold ${contactStatus.startsWith("Bericht") ? "bg-green/10 text-green" : "bg-coral/10 text-coral"}`}>
+                  {contactStatus}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={contactSending || !contactMessage.trim()}
+                className="w-full rounded-full bg-coral py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+              >
+                {contactSending ? "Verzenden..." : "Verstuur bericht"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8 flex items-center justify-between">
         <Link href="/" className="text-sm text-dark/50 hover:text-coral">
           ← Home
         </Link>
-        <button
-          onClick={() => {
-            logout();
-            router.push("/");
-          }}
-          className="text-sm text-dark/50 hover:text-coral"
-        >
-          Uitloggen
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => { setContactOpen(true); setContactStatus(null); }}
+            className="flex items-center gap-1.5 text-sm text-dark/50 hover:text-coral"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Vraag of tip
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              router.push("/");
+            }}
+            className="text-sm text-dark/50 hover:text-coral"
+          >
+            Uitloggen
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
