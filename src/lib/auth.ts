@@ -1,8 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "rondje-rekenen-dev-secret-change-me"
-);
+if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not set");
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export type TokenPayload = {
   role: "teacher" | "student";
