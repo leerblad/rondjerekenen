@@ -314,7 +314,6 @@ export default function Portal() {
             </button>
             <h2 className="text-xl font-extrabold">Stuur een bericht</h2>
             <p className="mt-1 text-sm text-dark/50">Heb je een vraag, tip of hulp nodig? We lezen je bericht zo snel mogelijk.</p>
-            <p className="mt-1 text-xs text-dark/30">Maximaal 3 berichten per uur.</p>
             <form onSubmit={sendContact} className="mt-5 flex flex-col gap-4">
               <div>
                 <label className="mb-1 block text-sm font-semibold text-dark/70">Onderwerp <span className="font-normal text-dark/30">(optioneel)</span></label>
