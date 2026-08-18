@@ -355,9 +355,11 @@ function makeG8Plus(wl: number): Question {
     a = rnd(1, 9) * 100;
     b = rnd(1, 9) * 100;
   } else if (wl <= 13) {
-    const maxVal = scale(wl, 300, 4000);
-    a = Math.round(rnd(100, maxVal) / 10) * 10;
-    b = Math.round(rnd(10, Math.min(990, Math.floor(maxVal / 2))) / 10) * 10;
+    // tientallen: max totaal ~1500, stap van 10
+    const maxA = scale(wl, 200, 900);
+    const maxB = scale(wl, 100, 600);
+    a = Math.round(rnd(100, maxA) / 10) * 10;
+    b = Math.round(rnd(10, maxB) / 10) * 10;
   } else {
     const maxResult = scale(wl, 2000, 10000);
     a = rnd(200, maxResult - 200);
@@ -375,9 +377,11 @@ function makeG8Min(wl: number): Question {
     b = rnd(1, 8) * 100;
     a = b + rnd(1, 9) * 100; // resultaat altijd positief en niet-triviaal
   } else if (wl <= 13) {
-    const maxVal = scale(wl, 300, 5000);
-    b = Math.round(rnd(10, Math.floor(maxVal / 3)) / 10) * 10;
-    a = b + Math.round(rnd(10, Math.min(Math.floor(maxVal * 2 / 3), 2000)) / 10) * 10;
+    // tientallen: stap van 10, verschil en aftrekker beperkt
+    const maxB = scale(wl, 100, 500);
+    const maxDiff = scale(wl, 100, 600);
+    b = Math.round(rnd(10, maxB) / 10) * 10;
+    a = b + Math.round(rnd(10, maxDiff) / 10) * 10;
   } else {
     const maxA = scale(wl, 2000, 10000);
     b = rnd(100, Math.floor(maxA / 2));

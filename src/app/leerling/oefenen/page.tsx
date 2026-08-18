@@ -728,14 +728,21 @@ function OefelenInner() {
               type="number"
               inputMode="numeric"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setInputValue(val);
+                if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+                if (val.trim() !== "") {
+                  submitTimerRef.current = setTimeout(() => {
+                    const v = parseInt(val, 10);
+                    if (!isNaN(v)) handleWarmupAnswer(v);
+                  }, 600);
+                }
+              }}
               disabled={locked}
               autoFocus
               className="w-full rounded-2xl border-2 border-black/10 bg-white px-6 py-5 text-center text-4xl font-extrabold focus:border-coral focus:outline-none disabled:opacity-50"
             />
-            <button type="submit" disabled={locked || !inputValue} className="w-full rounded-full bg-coral py-4 text-lg font-extrabold text-white transition hover:opacity-90 disabled:opacity-40">
-              Controleer
-            </button>
           </form>
         </div>
       </main>
@@ -1019,7 +1026,7 @@ function OefelenInner() {
             if (val.trim() !== "") {
               submitTimerRef.current = setTimeout(() => {
                 handleAnswer(parseInt(val, 10));
-              }, 600);
+              }, 1500);
             }
           }}
           placeholder="?"
