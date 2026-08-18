@@ -147,9 +147,10 @@ export default function Home() {
       </section>
 
       <footer className="pb-8 text-center text-xs text-dark/30">
-        Rondje Rekenen, dagelijks rekenen voor groep 4 t/m 8
-        <span className="mx-2">·</span>
-        <a href="/privacy" className="hover:text-dark underline underline-offset-2">Privacybeleid</a>
+        <p>Rondje Rekenen, dagelijks rekenen voor groep 4 t/m 8</p>
+        <p className="mt-1">
+          <a href="/privacy" className="hover:text-dark underline underline-offset-2">Privacybeleid</a>
+        </p>
       </footer>
     </div>
   );
