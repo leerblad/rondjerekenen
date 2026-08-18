@@ -66,8 +66,12 @@ export default function PrivacyPage() {
         <section>
           <h2 className="mb-2 text-base font-bold text-dark">8. Cookies</h2>
           <p>
-            Rondje Rekenen gebruikt geen tracking-cookies en geen advertentiecookies. We slaan enkel een inlogsessie op in de browser zodat je ingelogd blijft. Dit is strikt functioneel.
+            Rondje Rekenen gebruikt geen advertentiecookies en geen tracking-cookies voor commerciële doeleinden. We gebruiken uitsluitend:
           </p>
+          <ul className="mt-2 list-disc pl-5 space-y-1">
+            <li><strong>Functionele sessiecookie:</strong> om je ingelogd te houden.</li>
+            <li><strong>Vercel Analytics:</strong> anonieme paginastatistieken (bezoekersaantallen, paginaweergaven) via het hostingplatform Vercel. Er worden geen persoonsgegevens opgeslagen en de gegevens worden niet gekoppeld aan individuele gebruikers.</li>
+          </ul>
         </section>
 
         <section>
