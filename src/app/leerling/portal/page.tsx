@@ -195,9 +195,9 @@ export default function StudentPortal() {
           <Illustration name="coin" size={22} />
           {student.coins} munten
         </p>
-        <Link href="/leerling/winkel" className="inline-flex items-center gap-1 text-sm text-purple hover:underline">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-          Naar de winkel
+        <Link href="/leerling/winkel" className="flex flex-row items-center justify-center gap-1 text-sm text-purple hover:underline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:"inline",verticalAlign:"middle"}}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          <span>Naar de winkel</span>
         </Link>
         </div>
       </div>
@@ -255,6 +255,15 @@ export default function StudentPortal() {
           {student.coins < BONUS_COST && (
             <p className="text-center text-xs text-dark/40">Je hebt {BONUS_COST - student.coins} munten tekort voor een extra sessie.</p>
           )}
+          {/* Tafelspelletjes */}
+          <a
+            href="https://www.leerblad.nl/werkbladen/tafelspellen.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 flex items-center justify-center rounded-3xl bg-gradient-to-r from-yellow to-green py-5 font-bold text-white shadow transition hover:opacity-90"
+          >
+            🎲 Tafelspelletjes spelen!
+          </a>
         </div>
       )}
 
