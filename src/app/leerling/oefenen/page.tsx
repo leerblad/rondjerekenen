@@ -908,12 +908,6 @@ function OefelenInner() {
             >
               Terug naar huis
             </Link>
-            <Link
-              href="/leerling/winkel"
-              className="block w-full rounded-full bg-yellow/30 py-3 font-semibold text-dark transition hover:opacity-80"
-            >
-              Naar de winkel
-            </Link>
             {!isBonus && (
               <Link
                 href={canBonus ? "/leerling/oefenen?bonus=1" : "#"}
@@ -923,6 +917,15 @@ function OefelenInner() {
                 Extra sessie {canBonus ? `(${BONUS_COST} munten)` : `(${BONUS_COST - (student?.coins ?? 0)} munten te kort)`}
               </Link>
             )}
+            {/* Tafelspelletjes — externe link naar leerblad.nl */}
+            <a
+              href="https://www.leerblad.nl/werkbladen/tafelspellen.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-full bg-gradient-to-r from-yellow to-green py-3 font-bold text-white shadow transition hover:opacity-90 hover:shadow-md"
+            >
+              🎲 Tafelspelletjes spelen!
+            </a>
           </div>
         </div>
       </main>
