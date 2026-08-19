@@ -305,6 +305,13 @@ function OefelenInner() {
         };
         const next = [...answersRef.current, rec];
         answersRef.current = next;
+        // Add timed-out question to retry pool so it comes back within this level
+        const alreadyInPool = retryPoolRef.current.some(
+          (rq) => rq.a === curr.a && rq.b === curr.b && rq.operation === curr.operation
+        );
+        if (!alreadyInPool) {
+          retryPoolRef.current = [...retryPoolRef.current, { question: curr.question, answer: curr.answer, operation: curr.operation, a: curr.a, b: curr.b }];
+        }
         setFlash("red");
         setTimeout(() => {
           if (next.length >= QUESTIONS_PER_LEVEL) {
@@ -428,12 +435,21 @@ function OefelenInner() {
     answersRef.current = [...answersRef.current, rec];
     setFlash(isCorrect ? "green" : "red");
 
-    // If answered correctly, remove from retry pool so it won't keep returning
     if (isCorrect) {
+      // Remove from retry pool so it won't keep returning
       retryPoolRef.current = retryPoolRef.current.filter(
         (rq) => !(rq.a === q.a && rq.b === q.b && rq.operation === q.operation)
       );
       setRetryPool(retryPoolRef.current);
+    } else {
+      // Add to retry pool so it comes back within this level
+      const already = retryPoolRef.current.some(
+        (rq) => rq.a === q.a && rq.b === q.b && rq.operation === q.operation
+      );
+      if (!already) {
+        retryPoolRef.current = [...retryPoolRef.current, { question: q.question, answer: q.answer, operation: q.operation, a: q.a, b: q.b }];
+        setRetryPool(retryPoolRef.current);
+      }
     }
 
     setTimeout(() => {
