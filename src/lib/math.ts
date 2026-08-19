@@ -141,8 +141,8 @@ export function withinGradeLevel(level: number): number {
 export function getTimeLimit(level: number): number {
   const stage = levelToStage(level);
   const wl = withinStageLevel(level);
-  // Groep 8 tafels: 3s → 2s
-  if (stage === "g8_tafels") return Math.round(3000 - (wl - 1) * (1000 / 19));
+  // Groep 8 tafels: 3s → 1.5s
+  if (stage === "g8_tafels") return Math.round(3000 - (wl - 1) * (1500 / 19));
   // Groep 6 tafels & deeltafels: 6s → 4s
   if (stage === "g6_tafels" || stage === "g6_deeltafels") {
     return Math.round(6000 - (wl - 1) * (2000 / 19));
