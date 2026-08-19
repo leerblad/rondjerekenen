@@ -259,9 +259,17 @@ export default function StudentPortal() {
             href="https://www.leerblad.nl/werkbladen/tafelspellen.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 flex items-center justify-center rounded-3xl bg-gradient-to-r from-yellow to-green py-5 font-bold text-white shadow transition hover:opacity-90"
+            className="mt-1 flex items-center justify-center rounded-3xl bg-purple/15 py-4 font-bold text-purple transition hover:bg-purple/25"
           >
             🎲 Tafelspelletjes spelen!
+          </a>
+          <a
+            href="https://www.leerblad.nl/werkbladen/tafelsnake.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center rounded-3xl bg-purple/15 py-4 font-bold text-purple transition hover:bg-purple/25"
+          >
+            🐍 Tafelsnake spelen!
           </a>
         </div>
       )}

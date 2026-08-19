@@ -916,14 +916,22 @@ function OefelenInner() {
                 Extra sessie {canBonus ? `(${BONUS_COST} munten)` : `(${BONUS_COST - (student?.coins ?? 0)} munten te kort)`}
               </Link>
             )}
-            {/* Tafelspelletjes — externe link naar leerblad.nl */}
+            {/* Tafelspelletjes — externe links naar leerblad.nl */}
             <a
               href="https://www.leerblad.nl/werkbladen/tafelspellen.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full rounded-full bg-gradient-to-r from-yellow to-green py-3 font-bold text-white shadow transition hover:opacity-90 hover:shadow-md"
+              className="block w-full rounded-full bg-purple/15 py-3 font-bold text-purple transition hover:bg-purple/25"
             >
               🎲 Tafelspelletjes spelen!
+            </a>
+            <a
+              href="https://www.leerblad.nl/werkbladen/tafelsnake.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-full bg-purple/15 py-3 font-bold text-purple transition hover:bg-purple/25"
+            >
+              🐍 Tafelsnake spelen!
             </a>
           </div>
         </div>
