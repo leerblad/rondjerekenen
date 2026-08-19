@@ -143,10 +143,13 @@ export function getTimeLimit(level: number): number {
   const wl = withinStageLevel(level);
   // Groep 8 tafels: flat 2s (they should know these cold)
   if (stage === "g8_tafels") return 2000;
-  // Groep 6 tafels & groep 7 tafels/deeltafels: 3s → 2s
-  if (stage === "g6_tafels" || stage === "g6_deeltafels" ||
-      stage === "g7_tafels" || stage === "g7_deeltafels") {
+  // Groep 6 tafels & deeltafels: 3s → 2s
+  if (stage === "g6_tafels" || stage === "g6_deeltafels") {
     return Math.round(3000 - (wl - 1) * (1000 / 19));
+  }
+  // Groep 7 tafels & deeltafels: 6s → 2s
+  if (stage === "g7_tafels" || stage === "g7_deeltafels") {
+    return Math.round(6000 - (wl - 1) * (4000 / 19));
   }
   // All others: 6s → 3s
   return Math.round(6000 - (wl - 1) * (3000 / 19));
