@@ -151,6 +151,7 @@ function OefelenInner() {
   const finishLevelRef = useRef<(recorded: RecordedAnswer[], lvl: number) => void>(() => {});
 
   const sessionStartRef = useRef<number>(0);
+  const sessionEndRef = useRef<number>(0); // absolute deadline: counts down to 0 regardless of screens
   const questionRef = useRef<Question | null>(null);
   const startRef = useRef<number>(0);
   const answersRef = useRef<RecordedAnswer[]>([]);
@@ -163,9 +164,7 @@ function OefelenInner() {
   const startedRef = useRef(false);
   const finishingRef = useRef(false);
   const timeUpRef = useRef(false); // soft timer: finish current level before stopping
-  const pausedMsRef = useRef<number>(0);   // total ms spent paused
-  const pausedAtRef = useRef<number | null>(null); // timestamp of current pause start (pause button / visibility)
-  const resultScreenStartRef = useRef<number | null>(null); // unused, kept for safety
+  const pausedAtRef = useRef<number | null>(null); // timestamp of manual pause start (pause button only)
   const [isPaused, setIsPaused] = useState(false);
 
   // ── Warm-up state ─────────────────────────────────────────────────────────
@@ -228,10 +227,9 @@ function OefelenInner() {
     if (totalTimerRef.current) { clearInterval(totalTimerRef.current); totalTimerRef.current = null; }
   };
 
-  /** Returns elapsed session seconds, excluding paused time */
-  const elapsedSecs = useCallback(() => {
-    const paused = pausedMsRef.current + (pausedAtRef.current ? Date.now() - pausedAtRef.current : 0);
-    return Math.floor((Date.now() - sessionStartRef.current - paused) / 1000);
+  /** Seconds remaining in session (counts down, unaffected by result/warmup screens) */
+  const secsRemaining = useCallback(() => {
+    return Math.max(0, Math.ceil((sessionEndRef.current - Date.now()) / 1000));
   }, []);
 
   // ── Finish the entire session ──────────────────────────────────────────────
@@ -247,13 +245,15 @@ function OefelenInner() {
     if (pausedAtRef.current) return; // already paused
     pausedAtRef.current = Date.now();
     clearQTimer();
-    // Don't clear the total timer — it already skips ticks while pausedAtRef is set
+    // Total timer keeps running; deadline is extended when we resume
     setIsPaused(true);
   }, []);
 
   const resumeSession = useCallback((startQ: (rec: RecordedAnswer[], lvl: number, pool: Question[]) => void) => {
     if (!pausedAtRef.current) return;
-    pausedMsRef.current += Date.now() - pausedAtRef.current;
+    // Extend the deadline by however long we were paused
+    const pausedMs = Date.now() - pausedAtRef.current;
+    sessionEndRef.current += pausedMs;
     pausedAtRef.current = null;
     setIsPaused(false);
     // Restart the per-question timer (give full time again — fair to the student)
@@ -529,13 +529,13 @@ function OefelenInner() {
     retryPoolRef.current = [];
     timeUpRef.current = false;
     sessionStartRef.current = Date.now();
+    sessionEndRef.current = Date.now() + SESSION_SECONDS * 1000; // absolute deadline
     setPhase("playing");
 
     if (!isBonus) {
-      // 10-minute total countdown (paused time is excluded via elapsedSecs)
+      // 10-minute countdown — runs regardless of which screen is shown
       totalTimerRef.current = setInterval(() => {
-        if (pausedAtRef.current) return; // paused via button or visibility API
-        const secs = Math.max(0, SESSION_SECONDS - elapsedSecs());
+        const secs = secsRemaining();
         setTotalSecsLeft(secs);
         if (secs <= 0 && !timeUpRef.current) {
           timeUpRef.current = true;
@@ -582,23 +582,24 @@ function OefelenInner() {
     return () => { clearQTimer(); clearTotalTimer(); };
   }, []);
 
-  // Page Visibility API: auto-pause when tab is hidden, resume when visible
+  // Page Visibility API: pause the question timer when tab is hidden
+  // (total session timer keeps running — time on result screen counts)
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
-        // Only pause if we're actively playing
         if (phase === "playing" && !pausedAtRef.current) {
           pauseSession();
         }
       } else {
-        if (pausedAtRef.current) {
+        // Only resume if we paused via visibility (not manual pause button)
+        if (pausedAtRef.current && !isPaused) {
           resumeSession(startQuestion);
         }
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [phase, pauseSession, resumeSession, startQuestion]);
+  }, [phase, isPaused, pauseSession, resumeSession, startQuestion]);
 
   // Consolation coins: 10 if no level was passed this session (non-bonus only)
   useEffect(() => {
@@ -761,7 +762,7 @@ function OefelenInner() {
   if (phase === "level-result" && levelResult) {
     const r = levelResult;
     const pctStr = Math.round(r.pct * 100);
-    const secsLeft = Math.max(0, SESSION_SECONDS - Math.floor((Date.now() - sessionStartRef.current) / 1000));
+    const secsLeft = secsRemaining();
     const minsLeft = Math.floor(secsLeft / 60);
     const secsLeftMod = secsLeft % 60;
 
