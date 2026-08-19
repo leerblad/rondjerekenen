@@ -195,9 +195,8 @@ export default function StudentPortal() {
           <Illustration name="coin" size={22} />
           {student.coins} munten
         </p>
-        <Link href="/leerling/winkel" className="flex flex-row items-center justify-center gap-1 text-sm text-purple hover:underline">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:"inline",verticalAlign:"middle"}}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-          <span>Naar de winkel</span>
+        <Link href="/leerling/winkel" className="text-sm text-purple hover:underline" style={{display:"inline-block"}}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:"inline",verticalAlign:"-2px",marginRight:"3px"}}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Naar de winkel
         </Link>
         </div>
       </div>
