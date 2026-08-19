@@ -177,7 +177,7 @@ function OefelenInner() {
   // Persisted in localStorage; adjusts after each level based on accuracy
   const ADAPTIVE_MIN = 3000;
   const ADAPTIVE_MAX = 8000;
-  const ADAPTIVE_STEP = 500;
+  const ADAPTIVE_STEP = 250; // 0.25s per stap → 20 stappen voor volledig bereik (8s→3s)
 
   const getAdaptiveTime = useCallback((lvl: number): number => {
     const grade = levelToGrade(lvl);
