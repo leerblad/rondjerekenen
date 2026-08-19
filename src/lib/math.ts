@@ -69,7 +69,7 @@ export const STAGE_LABELS: Record<Stage, string> = {
   // Groep 8
   g8_plus:      "Optellen t/m 10.000",
   g8_min:       "Aftrekken t/m 10.000",
-  g8_pct_basis: "Procenten (10%, 25%, 50%)",
+  g8_pct_basis: "Procenten van ronde getallen",
   g8_tafels:    "Tafels snel (2 sec)",
   g8_plus_min:  "Grote sommen",
   g8_alles:     "Alles groep 8",
@@ -344,51 +344,44 @@ function makeG7Min(wl: number): Question {
 // ─── Groep 8 ─────────────────────────────────────────────────────────────────
 // Optellen/aftrekken t/m 10.000, procenten
 
-const PCT_BASIS  = [10, 25, 50];
-const PCT_MEER   = [10, 15, 20, 25, 50, 75];
-const PCT_BASES  = [100, 200, 300, 400, 500, 80, 120, 150, 250, 60, 40, 1000];
-const PCT_BASES2 = [100, 200, 150, 80, 60, 120, 250, 400, 500, 1000];
+// Procenten: uitgebreid met 40%, 60%, 75% — altijd van ronde honderden
+const PCT_BASIS  = [10, 20, 25, 40, 50, 60, 75];
+const PCT_MEER   = [10, 20, 25, 40, 50, 60, 75];
+const PCT_BASES  = [100, 200, 300, 400, 500, 600, 800, 1000];
+const PCT_BASES2 = [100, 200, 300, 400, 500, 600, 800, 1000];
 
 function makeG8Plus(wl: number): Question {
-  // wl 1-6:  ronde honderden  → 400 + 300, 200 + 600
-  // wl 7-13: tientallen       → 550 + 120, 840 + 230
-  // wl 14-20: willekeurig     → 1248 + 361
+  // wl 1-14: ronde honderden (veelvouden van 100) → 400 + 300, 1100 + 600
+  // wl 15-20: tientallen (veelvouden van 10)       → 450 + 810, 1230 + 760
   let a: number, b: number;
-  if (wl <= 6) {
-    a = rnd(1, 9) * 100;
-    b = rnd(1, 9) * 100;
-  } else if (wl <= 13) {
-    // tientallen: max totaal ~1500, stap van 10
-    const maxA = scale(wl, 200, 900);
-    const maxB = scale(wl, 100, 600);
+  if (wl <= 14) {
+    const maxA = Math.round(scale(wl, 200, 3000) / 100) * 100;
+    const maxB = Math.round(scale(wl, 100, 1500) / 100) * 100;
+    a = Math.round(rnd(100, maxA) / 100) * 100;
+    b = Math.round(rnd(100, maxB) / 100) * 100;
+  } else {
+    const maxA = Math.round(scale(wl, 1000, 6000) / 10) * 10;
+    const maxB = Math.round(scale(wl, 200, 3000) / 10) * 10;
     a = Math.round(rnd(100, maxA) / 10) * 10;
     b = Math.round(rnd(10, maxB) / 10) * 10;
-  } else {
-    const maxResult = scale(wl, 2000, 10000);
-    a = rnd(200, maxResult - 200);
-    b = rnd(100, Math.min(maxResult - a, 3000));
   }
   return { question: `${a} + ${b} = ?`, answer: a + b, operation: "plus", a, b };
 }
 
 function makeG8Min(wl: number): Question {
-  // wl 1-6:  ronde honderden  → 1000 - 500, 800 - 300
-  // wl 7-13: tientallen       → 620 - 110, 850 - 230
-  // wl 14-20: willekeurig     → 1348 - 261
+  // wl 1-14: ronde honderden (veelvouden van 100) → 1100 - 400, 2000 - 800
+  // wl 15-20: tientallen (veelvouden van 10)       → 850 - 230, 1630 - 470
   let a: number, b: number;
-  if (wl <= 6) {
-    b = rnd(1, 8) * 100;
-    a = b + rnd(1, 9) * 100; // resultaat altijd positief en niet-triviaal
-  } else if (wl <= 13) {
-    // tientallen: stap van 10, verschil en aftrekker beperkt
-    const maxB = scale(wl, 100, 500);
-    const maxDiff = scale(wl, 100, 600);
+  if (wl <= 14) {
+    const maxB = Math.round(scale(wl, 100, 1500) / 100) * 100;
+    const maxDiff = Math.round(scale(wl, 100, 2000) / 100) * 100;
+    b = Math.round(rnd(100, maxB) / 100) * 100;
+    a = b + Math.round(rnd(100, maxDiff) / 100) * 100;
+  } else {
+    const maxB = Math.round(scale(wl, 200, 3000) / 10) * 10;
+    const maxDiff = Math.round(scale(wl, 100, 3000) / 10) * 10;
     b = Math.round(rnd(10, maxB) / 10) * 10;
     a = b + Math.round(rnd(10, maxDiff) / 10) * 10;
-  } else {
-    const maxA = scale(wl, 2000, 10000);
-    b = rnd(100, Math.floor(maxA / 2));
-    a = b + rnd(100, Math.min(maxA - b, 3000));
   }
   return { question: `${a} − ${b} = ?`, answer: a - b, operation: "min", a, b };
 }
