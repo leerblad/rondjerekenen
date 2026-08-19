@@ -574,9 +574,13 @@ function OefelenInner() {
       startedRef.current = true;
       startSession();
     }
-    return () => { clearQTimer(); clearTotalTimer(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, student]);
+
+  // Cleanup timers only on unmount
+  useEffect(() => {
+    return () => { clearQTimer(); clearTotalTimer(); };
+  }, []);
 
   // Page Visibility API: auto-pause when tab is hidden, resume when visible
   useEffect(() => {
