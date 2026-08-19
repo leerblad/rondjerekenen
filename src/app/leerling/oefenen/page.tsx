@@ -164,7 +164,8 @@ function OefelenInner() {
   const finishingRef = useRef(false);
   const timeUpRef = useRef(false); // soft timer: finish current level before stopping
   const pausedMsRef = useRef<number>(0);   // total ms spent paused
-  const pausedAtRef = useRef<number | null>(null); // timestamp of current pause start
+  const pausedAtRef = useRef<number | null>(null); // timestamp of current pause start (pause button / visibility)
+  const resultScreenStartRef = useRef<number | null>(null); // timestamp when result screen opened
   const [isPaused, setIsPaused] = useState(false);
 
   // ── Warm-up state ─────────────────────────────────────────────────────────
@@ -237,6 +238,7 @@ function OefelenInner() {
   const endSession = useCallback(() => {
     clearQTimer();
     clearTotalTimer();
+    resultScreenStartRef.current = null;
     setPhase("done");
   }, []);
 
@@ -396,8 +398,9 @@ function OefelenInner() {
     if (timeUpRef.current) { setPhase("done"); return; }
 
     // Show result screen — student clicks through themselves
-    // Pause the session timer so it doesn't tick while reading results
-    if (!pausedAtRef.current) pausedAtRef.current = Date.now();
+    // Track result screen time separately (not via pausedAtRef to avoid
+    // conflicts with the pause button / visibility API)
+    resultScreenStartRef.current = Date.now();
     setPhase("level-result");
   }, [student, isBonus, updateStudent, startQuestion]);
 
@@ -517,7 +520,7 @@ function OefelenInner() {
     if (!isBonus) {
       // 10-minute total countdown (paused time is excluded via elapsedSecs)
       totalTimerRef.current = setInterval(() => {
-        if (pausedAtRef.current) return; // timer ticks but display doesn't change while paused
+        if (pausedAtRef.current || resultScreenStartRef.current) return; // paused or on result screen
         const secs = Math.max(0, SESSION_SECONDS - elapsedSecs());
         setTotalSecsLeft(secs);
         if (secs <= 0 && !timeUpRef.current) {
@@ -602,10 +605,10 @@ function OefelenInner() {
 
   // ── Go to next level ───────────────────────────────────────────────────────
   const goNextLevel = useCallback((result: LevelResult) => {
-    // Resume session timer that was paused during result screen
-    if (pausedAtRef.current) {
-      pausedMsRef.current += Date.now() - pausedAtRef.current;
-      pausedAtRef.current = null;
+    // Add result screen time to paused time so session timer stays accurate
+    if (resultScreenStartRef.current) {
+      pausedMsRef.current += Date.now() - resultScreenStartRef.current;
+      resultScreenStartRef.current = null;
     }
     const nextLvl = result.newLevel > result.level ? result.newLevel : result.level;
     currentLevelRef.current = nextLvl;
@@ -620,10 +623,10 @@ function OefelenInner() {
 
   // ── Retry current level ────────────────────────────────────────────────────
   const retryLevel = useCallback((result: LevelResult) => {
-    // Resume session timer that was paused during result screen
-    if (pausedAtRef.current) {
-      pausedMsRef.current += Date.now() - pausedAtRef.current;
-      pausedAtRef.current = null;
+    // Add result screen time to paused time so session timer stays accurate
+    if (resultScreenStartRef.current) {
+      pausedMsRef.current += Date.now() - resultScreenStartRef.current;
+      resultScreenStartRef.current = null;
     }
     const pool = result.wrongQuestions;
     currentLevelRef.current = result.level;
