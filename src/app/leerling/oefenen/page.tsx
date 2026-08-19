@@ -395,23 +395,9 @@ function OefelenInner() {
     // Time is up → done (finish current level was already natural)
     if (timeUpRef.current) { setPhase("done"); return; }
 
-    // Passed and time remains → auto-advance to next level after brief pause
-    if (passed && newLevel > lvl && newLevel <= MAX_LEVEL) {
-      setPhase("level-result"); // briefly show result
-      setTimeout(() => {
-        if (timeUpRef.current) { setPhase("done"); return; }
-        currentLevelRef.current = newLevel;
-        setCurrentLevel(newLevel);
-        answersRef.current = [];
-        retryPoolRef.current = [];
-        setRetryPool([]);
-        setPhase("playing");
-        startQuestion([], newLevel, []);
-      }, 2000); // 2s to show the result, then auto-continue
-      return;
-    }
-
-    // Failed or max level reached → show result screen
+    // Show result screen — student clicks through themselves
+    // Pause the session timer so it doesn't tick while reading results
+    if (!pausedAtRef.current) pausedAtRef.current = Date.now();
     setPhase("level-result");
   }, [student, isBonus, updateStudent, startQuestion]);
 
@@ -616,6 +602,11 @@ function OefelenInner() {
 
   // ── Go to next level ───────────────────────────────────────────────────────
   const goNextLevel = useCallback((result: LevelResult) => {
+    // Resume session timer that was paused during result screen
+    if (pausedAtRef.current) {
+      pausedMsRef.current += Date.now() - pausedAtRef.current;
+      pausedAtRef.current = null;
+    }
     const nextLvl = result.newLevel > result.level ? result.newLevel : result.level;
     currentLevelRef.current = nextLvl;
     setCurrentLevel(nextLvl);
@@ -629,6 +620,11 @@ function OefelenInner() {
 
   // ── Retry current level ────────────────────────────────────────────────────
   const retryLevel = useCallback((result: LevelResult) => {
+    // Resume session timer that was paused during result screen
+    if (pausedAtRef.current) {
+      pausedMsRef.current += Date.now() - pausedAtRef.current;
+      pausedAtRef.current = null;
+    }
     const pool = result.wrongQuestions;
     currentLevelRef.current = result.level;
     setCurrentLevel(result.level);
