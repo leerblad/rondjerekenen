@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabase";
 import { signToken } from "@/lib/auth";
+import { GRADE_START_LEVEL } from "@/lib/math";
 
 export async function POST(req: Request) {
   const { classCode, nickname, grade, password, avatarUrl } = await req.json();
@@ -28,7 +29,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const insertData: Record<string, unknown> = { nickname, class_code: code, grade: g, avatar_url: avatarUrl || null };
+  const startLevel = GRADE_START_LEVEL[g as 4 | 5 | 6 | 7 | 8] ?? 1;
+  const insertData: Record<string, unknown> = { nickname, class_code: code, grade: g, level: startLevel, avatar_url: avatarUrl || null };
   if (password && password.length >= 6) {
     insertData.password_hash = await bcrypt.hash(password, 10);
   }
