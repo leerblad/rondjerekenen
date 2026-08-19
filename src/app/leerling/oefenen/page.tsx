@@ -236,7 +236,6 @@ function OefelenInner() {
   const endSession = useCallback(() => {
     clearQTimer();
     clearTotalTimer();
-    resultScreenStartRef.current = null;
     setPhase("done");
   }, []);
 
