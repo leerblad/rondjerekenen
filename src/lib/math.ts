@@ -55,7 +55,7 @@ export const STAGE_LABELS: Record<Stage, string> = {
   // Groep 6
   g6_tafels:    "Tafels snel",
   g6_deeltafels:"Deeltafels snel",
-  g6_hogere:    "Hogere tafels (×10, ×25...)",
+  g6_hogere:    "Hogere tafels (×10, ×20...)",
   g6_plus:      "Optellen t/m 100",
   g6_min:       "Aftrekken t/m 100",
   g6_alles:     "Alles groep 6",
@@ -262,7 +262,7 @@ function makeG5Deel(wl: number): Question {
 // ─── Groep 6 ─────────────────────────────────────────────────────────────────
 // Tafels automatiseren (snel), hogere tafels, optellen/aftrekken t/m 100
 
-const HOGERE_TAFELS = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+const HOGERE_TAFELS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 function makeG6Tafel(wl: number): Question {
   // All tables 1-10 × 1-10, practised at speed
@@ -278,7 +278,7 @@ function makeG6Deel(wl: number): Question {
 }
 
 function makeG6Hogere(wl: number): Question {
-  // Multiples of 10, 15, 20 ... 100; grow the range as wl increases
+  // Veelvouden van 10 t/m 100; bereik groeit met wl
   const maxIdx = scale(wl, 2, HOGERE_TAFELS.length - 1);
   const factor = HOGERE_TAFELS[rnd(0, maxIdx)];
   const a = rnd(2, 9);
