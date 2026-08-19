@@ -733,10 +733,11 @@ function OefelenInner() {
                 setInputValue(val);
                 if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
                 if (val.trim() !== "") {
+                  const v = parseInt(val, 10);
+                  const isCorrect = !isNaN(v) && questionRef.current && v === questionRef.current.answer;
                   submitTimerRef.current = setTimeout(() => {
-                    const v = parseInt(val, 10);
                     if (!isNaN(v)) handleWarmupAnswer(v);
-                  }, 600);
+                  }, isCorrect ? 300 : 600);
                 }
               }}
               disabled={locked}
@@ -1029,9 +1030,11 @@ function OefelenInner() {
             setInputValue(val);
             if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
             if (val.trim() !== "") {
+              const parsed = parseInt(val, 10);
+              const isCorrect = !isNaN(parsed) && questionRef.current && parsed === questionRef.current.answer;
               submitTimerRef.current = setTimeout(() => {
-                handleAnswer(parseInt(val, 10));
-              }, 1500);
+                handleAnswer(parsed);
+              }, isCorrect ? 300 : 1500);
             }
           }}
           placeholder="?"
